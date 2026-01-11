@@ -3,7 +3,7 @@ import { defineConfig } from 'wxt'
 
 export default defineConfig({
   srcDir: 'src',
-  publicDir: 'src/public',
+  publicDir: 'public',
   outDir: 'dist',
   modules: ['@wxt-dev/module-svelte'],
   vite: () => ({
