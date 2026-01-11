@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { HeaderKey, Settings, Site } from '@/lib/configs'
-import { getSettings, saveSettings } from '@/lib/storage'
+import type { HeaderKey, Settings, Site } from '../../lib/configs'
+import { getSettings, saveSettings } from '../../lib/storage'
 import HeaderList from './components/HeaderList.svelte'
 import SiteList from './components/SiteList.svelte'
 

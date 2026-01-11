@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Script } from '@/lib/configs'
+import type { Script } from '../../../lib/configs'
 
 interface Props {
   scripts: Script[]

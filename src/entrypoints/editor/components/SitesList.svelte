@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Site } from '@/lib/configs'
+import type { Site } from '../../../lib/configs'
 
 interface Props {
   sites: Site[]

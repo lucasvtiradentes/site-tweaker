@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { HeaderKey, Headers } from '@/lib/configs'
+import type { HeaderKey, Headers } from '../../../lib/configs'
 
 interface Props {
   headers: Headers

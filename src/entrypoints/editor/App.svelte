@@ -1,6 +1,6 @@
 <script lang="ts">
-import { type Script, type Settings, type Site, createScript, createSite } from '@/lib/configs'
-import { getSettings, saveSettings } from '@/lib/storage'
+import { type Script, type Settings, type Site, createScript, createSite } from '../../lib/configs'
+import { getSettings, saveSettings } from '../../lib/storage'
 import AddSiteModal from './components/AddSiteModal.svelte'
 import ScriptEditor from './components/ScriptEditor.svelte'
 import ScriptsList from './components/ScriptsList.svelte'
