@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings } from '@/lib/configs'
+import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings } from '../lib/configs'
 
 export default defineBackground(() => {
   let isUpdating = false

@@ -59,6 +59,8 @@ function createFloatingUI(siteData: SiteData): void {
 
   container = document.createElement('div')
   container.id = CONTAINER_ID
+  container.style.cssText =
+    'position: fixed !important; bottom: 20px !important; right: 20px !important; z-index: 2147483647 !important;'
 
   const shadow = container.attachShadow({ mode: 'open' })
 
@@ -70,7 +72,7 @@ function createFloatingUI(siteData: SiteData): void {
   appContainer.id = 'app'
   shadow.appendChild(appContainer)
 
-  document.body.appendChild(container)
+  document.documentElement.appendChild(container)
 
   appInstance = mount(App, {
     target: appContainer,
