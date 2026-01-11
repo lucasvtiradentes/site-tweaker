@@ -1,5 +1,5 @@
 {
-  "name": "csp-toggler",
+  "name": "csp-scope",
   "version": "1.0.0",
   "description": "Chrome extension to selectively disable CSP headers for specific sites",
   "type": "module",
