@@ -6,21 +6,24 @@
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c",
+    "icons": "tsx scripts/generate-icons.ts",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
     "format": "biome format --write src",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/chrome": "^0.0.287",
+    "@types/node": "^25.0.6",
     "biome": "^0.3.3",
-    "@biomejs/biome": "^1.9.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
     "rollup": "^4.29.1",
     "rollup-plugin-copy": "^3.5.0",
     "tslib": "^2.8.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   },
   "lint-staged": {
