@@ -5,6 +5,7 @@
   "description": "Selectively disable CSP headers for specific sites",
   "permissions": [
     "storage",
+    "tabs",
     "declarativeNetRequest",
     "declarativeNetRequestFeedback"
   ],
