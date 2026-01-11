@@ -1,4 +1,4 @@
-import { type HeaderKey, type Settings, DEFAULT_SETTINGS } from '../types'
+import { type HeaderKey, type Settings, DEFAULT_SETTINGS } from '../configs'
 
 let isUpdating = false
 

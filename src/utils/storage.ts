@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, type Settings, type Site } from '../types'
+import { DEFAULT_SETTINGS, type Settings, type Site } from '../configs'
 
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get('settings')
