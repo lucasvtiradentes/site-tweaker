@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "wxt",
-    "build": "rimraf dist && wxt build && mv dist/chrome-mv3/* dist/ && rimraf dist/chrome-mv3 .wxt .output",
-    "zip": "rimraf dist && wxt zip && rimraf .wxt .output",
+    "build": "rimraf dist && wxt build && mv dist/chrome-mv3/* dist/ && rimraf dist/chrome-mv3",
+    "zip": "rimraf dist && wxt zip",
     "icons": "tsx scripts/generate-icons.ts",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
