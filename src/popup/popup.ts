@@ -1,4 +1,4 @@
-import { type HeaderKey, type Settings, type Site, DEFAULT_SETTINGS } from '../configs'
+import { DEFAULT_SETTINGS, type HeaderKey, type Settings, type Site } from '../configs'
 
 async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get('settings')
@@ -71,9 +71,10 @@ function renderSiteList(sites: Site[]): void {
     siteList.appendChild(li)
   }
 
-  siteList.querySelectorAll('.toggle-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
-      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain!
+  for (const btn of Array.from(siteList.querySelectorAll('.toggle-btn'))) {
+    btn.addEventListener('click', async (e: Event) => {
+      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain
+      if (!domain) return
       const settings = await getSettings()
       const site = settings.sites.find((s) => s.domain === domain)
       if (site) {
@@ -82,17 +83,18 @@ function renderSiteList(sites: Site[]): void {
         renderSiteList(settings.sites)
       }
     })
-  })
+  }
 
-  siteList.querySelectorAll('.delete-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
-      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain!
+  for (const btn of Array.from(siteList.querySelectorAll('.delete-btn'))) {
+    btn.addEventListener('click', async (e: Event) => {
+      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain
+      if (!domain) return
       const settings = await getSettings()
       settings.sites = settings.sites.filter((s) => s.domain !== domain)
       await saveSettings(settings)
       renderSiteList(settings.sites)
     })
-  })
+  }
 }
 
 function renderHeaderList(headers: Settings['headers']): void {
@@ -111,15 +113,16 @@ function renderHeaderList(headers: Settings['headers']): void {
     headerList.appendChild(li)
   }
 
-  headerList.querySelectorAll('.toggle-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+  for (const btn of Array.from(headerList.querySelectorAll('.toggle-btn'))) {
+    btn.addEventListener('click', async (e: Event) => {
       const header = (e.currentTarget as HTMLButtonElement).dataset.header as HeaderKey
+      if (!header) return
       const settings = await getSettings()
       settings.headers[header] = !settings.headers[header]
       await saveSettings(settings)
       renderHeaderList(settings.headers)
     })
-  })
+  }
 }
 
 async function updateGlobalToggleState(): Promise<void> {
