@@ -1,4 +1,4 @@
-import { type HeaderKey, type Settings, DEFAULT_SETTINGS } from '../configs'
+import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings } from '../configs'
 
 let isUpdating = false
 
@@ -7,9 +7,9 @@ async function getSettings(): Promise<Settings> {
   return result.settings ?? DEFAULT_SETTINGS
 }
 
-function getEnabledDomains(settings: Settings): string[] {
+function getEnabledCspDomains(settings: Settings): string[] {
   if (!settings.enabled) return []
-  return settings.sites.filter((s) => s.enabled).map((s) => s.domain)
+  return settings.sites.filter((s) => s.enabled && s.cspEnabled).map((s) => s.domain)
 }
 
 function getEnabledHeaders(settings: Settings): HeaderKey[] {
@@ -31,17 +31,34 @@ function isDomainInList(domain: string, domains: string[]): boolean {
   return domains.some((d) => domain === d || domain === `www.${d}` || domain.endsWith(`.${d}`))
 }
 
+function matchesUrlPatterns(url: string, patterns: string[]): boolean {
+  if (patterns.length === 0) return true
+  try {
+    const urlObj = new URL(url)
+    const path = urlObj.pathname + urlObj.search
+    return patterns.some((pattern) => {
+      if (pattern.includes('*')) {
+        const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`)
+        return regex.test(path)
+      }
+      return path.startsWith(pattern)
+    })
+  } catch {
+    return false
+  }
+}
+
 type IconState = 'active' | 'outline' | 'disabled'
 
 async function updateIconForTab(tabId: number, url: string | undefined): Promise<void> {
   const settings = await getSettings()
-  const enabledDomains = getEnabledDomains(settings)
 
   let state: IconState = 'disabled'
 
   if (settings.enabled) {
     const domain = url ? extractDomain(url) : null
-    if (domain && isDomainInList(domain, enabledDomains)) {
+    const site = domain ? settings.sites.find((s) => s.domain === domain && s.enabled) : null
+    if (site) {
       state = 'active'
     } else {
       state = 'outline'
@@ -69,13 +86,13 @@ async function updateAllTabsIcons(): Promise<void> {
   }
 }
 
-async function updateRules(): Promise<void> {
+async function updateCspRules(): Promise<void> {
   if (isUpdating) return
   isUpdating = true
 
   try {
     const settings = await getSettings()
-    const domains = getEnabledDomains(settings)
+    const domains = getEnabledCspDomains(settings)
     const headers = getEnabledHeaders(settings)
 
     await chrome.declarativeNetRequest.updateDynamicRules({
@@ -120,15 +137,78 @@ async function updateRules(): Promise<void> {
   }
 }
 
+async function injectScript(tabId: number, script: Script): Promise<void> {
+  try {
+    if (script.type === 'css') {
+      await chrome.scripting.insertCSS({
+        target: { tabId },
+        css: script.code,
+      })
+    } else {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (code: string) => {
+          const fn = new Function(code)
+          fn()
+        },
+        args: [script.code],
+        world: 'MAIN',
+      })
+    }
+  } catch (err) {
+    console.error(`Failed to inject script ${script.name}:`, err)
+  }
+}
+
+async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
+  const settings = await getSettings()
+  if (!settings.enabled) return
+
+  const domain = extractDomain(url)
+  if (!domain) return
+
+  const site = settings.sites.find((s) => s.domain === domain && s.enabled)
+  if (!site) return
+
+  for (const script of site.scripts) {
+    if (!script.enabled || !script.autoRun) continue
+    if (!matchesUrlPatterns(url, script.urlPatterns)) continue
+    await injectScript(tabId, script)
+  }
+}
+
+async function executeManualScript(
+  siteId: string,
+  scriptId: string,
+  tabId: number,
+): Promise<{ success: boolean; error?: string }> {
+  const settings = await getSettings()
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return { success: false, error: 'Site not found' }
+
+  const script = site.scripts.find((s) => s.id === scriptId)
+  if (!script) return { success: false, error: 'Script not found' }
+
+  try {
+    await injectScript(tabId, script)
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: String(err) }
+  }
+}
+
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.settings) {
-    updateRules()
+    updateCspRules()
   }
 })
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.url || changeInfo.status === 'complete') {
+  if (changeInfo.status === 'complete' && tab.url) {
     updateIconForTab(tabId, tab.url)
+    injectAutoRunScripts(tabId, tab.url)
+  } else if (changeInfo.url) {
+    updateIconForTab(tabId, changeInfo.url)
   }
 })
 
@@ -137,8 +217,47 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   updateIconForTab(activeInfo.tabId, tab.url)
 })
 
-chrome.runtime.onInstalled.addListener(() => {
-  updateRules()
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'EXECUTE_SCRIPT') {
+    const tabId = msg.tabId ?? sender.tab?.id
+    if (!tabId) {
+      sendResponse({ success: false, error: 'No tab ID' })
+      return true
+    }
+    executeManualScript(msg.siteId, msg.scriptId, tabId).then(sendResponse)
+    return true
+  }
+  if (msg.type === 'GET_CURRENT_TAB_INFO') {
+    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+      const tab = tabs[0]
+      if (tab?.url) {
+        const domain = extractDomain(tab.url)
+        sendResponse({ tabId: tab.id, url: tab.url, domain })
+      } else {
+        sendResponse({ tabId: null, url: null, domain: null })
+      }
+    })
+    return true
+  }
+  if (msg.type === 'GET_SITE_DATA') {
+    getSettings().then((settings) => {
+      if (!settings.enabled) {
+        sendResponse(null)
+        return
+      }
+      const site = settings.sites.find((s) => s.domain === msg.domain && s.enabled)
+      if (!site) {
+        sendResponse(null)
+        return
+      }
+      sendResponse({ site, scripts: site.scripts.filter((s) => s.enabled) })
+    })
+    return true
+  }
 })
 
-updateRules()
+chrome.runtime.onInstalled.addListener(() => {
+  updateCspRules()
+})
+
+updateCspRules()

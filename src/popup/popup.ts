@@ -9,24 +9,15 @@ async function saveSettings(settings: Settings): Promise<void> {
   await chrome.storage.local.set({ settings })
 }
 
-function normalizeDomain(input: string): string {
-  let domain = input.trim().toLowerCase()
-  domain = domain.replace(/^https?:\/\//, '')
-  domain = domain.replace(/\/.*$/, '')
-  domain = domain.replace(/^www\./, '')
-  return domain
-}
-
 const globalToggle = document.getElementById('globalToggle') as HTMLButtonElement
 const settingsBtn = document.getElementById('settingsBtn') as HTMLButtonElement
 const mainView = document.getElementById('mainView') as HTMLDivElement
 const settingsView = document.getElementById('settingsView') as HTMLDivElement
-const siteInput = document.getElementById('siteInput') as HTMLInputElement
-const addSiteBtn = document.getElementById('addSiteBtn') as HTMLButtonElement
-const siteList = document.getElementById('siteList') as HTMLUListElement
+const sitesList = document.getElementById('sitesList') as HTMLUListElement
+const noSites = document.getElementById('noSites') as HTMLParagraphElement
 const headerList = document.getElementById('headerList') as HTMLUListElement
 const backBtn = document.getElementById('backBtn') as HTMLButtonElement
-const emptyState = document.getElementById('emptyState') as HTMLParagraphElement
+const openEditor = document.getElementById('openEditor') as HTMLButtonElement
 
 function createToggleIcon(enabled: boolean): string {
   if (enabled) {
@@ -41,58 +32,47 @@ function createToggleIcon(enabled: boolean): string {
   </svg>`
 }
 
-function createDeleteIcon(): string {
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>`
-}
+async function renderSitesList(): Promise<void> {
+  const settings = await getSettings()
+  sitesList.innerHTML = ''
 
-function renderSiteList(sites: Site[]): void {
-  siteList.innerHTML = ''
-  emptyState.classList.toggle('hidden', sites.length > 0)
+  if (settings.sites.length === 0) {
+    noSites.classList.remove('hidden')
+    return
+  }
 
-  for (const site of sites) {
+  noSites.classList.add('hidden')
+
+  for (const site of settings.sites) {
+    const scriptCount = site.scripts.length
     const li = document.createElement('li')
     li.className = 'site-item'
     li.innerHTML = `
       <div class="site-info">
         <span class="site-domain">${site.domain}</span>
+        <span class="site-meta">${scriptCount} script${scriptCount !== 1 ? 's' : ''}</span>
       </div>
       <div class="site-actions">
-        <button class="toggle-btn ${site.enabled ? 'enabled' : ''}" data-domain="${site.domain}" title="${site.enabled ? 'Disable' : 'Enable'}">
-          ${createToggleIcon(site.enabled)}
-        </button>
-        <button class="delete-btn" data-domain="${site.domain}" title="Remove">
-          ${createDeleteIcon()}
+        <button class="csp-btn ${site.cspEnabled ? 'enabled' : ''}" data-site-id="${site.id}" title="Toggle CSP bypass">
+          CSP
         </button>
       </div>
     `
-    siteList.appendChild(li)
+    sitesList.appendChild(li)
   }
 
-  for (const btn of Array.from(siteList.querySelectorAll('.toggle-btn'))) {
+  for (const btn of Array.from(sitesList.querySelectorAll('.csp-btn'))) {
     btn.addEventListener('click', async (e: Event) => {
-      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain
-      if (!domain) return
+      e.stopPropagation()
+      const siteId = (e.currentTarget as HTMLButtonElement).dataset.siteId
+      if (!siteId) return
       const settings = await getSettings()
-      const site = settings.sites.find((s) => s.domain === domain)
+      const site = settings.sites.find((s) => s.id === siteId)
       if (site) {
-        site.enabled = !site.enabled
+        site.cspEnabled = !site.cspEnabled
         await saveSettings(settings)
-        renderSiteList(settings.sites)
+        await renderSitesList()
       }
-    })
-  }
-
-  for (const btn of Array.from(siteList.querySelectorAll('.delete-btn'))) {
-    btn.addEventListener('click', async (e: Event) => {
-      const domain = (e.currentTarget as HTMLButtonElement).dataset.domain
-      if (!domain) return
-      const settings = await getSettings()
-      settings.sites = settings.sites.filter((s) => s.domain !== domain)
-      await saveSettings(settings)
-      renderSiteList(settings.sites)
     })
   }
 }
@@ -149,29 +129,13 @@ backBtn.addEventListener('click', () => {
   mainView.classList.remove('hidden')
 })
 
-async function addSite(): Promise<void> {
-  const domain = normalizeDomain(siteInput.value)
-  if (!domain) return
-
-  const settings = await getSettings()
-  const exists = settings.sites.some((s) => s.domain === domain)
-  if (!exists) {
-    settings.sites.push({ domain, enabled: true })
-    await saveSettings(settings)
-    renderSiteList(settings.sites)
-  }
-  siteInput.value = ''
-}
-
-addSiteBtn.addEventListener('click', addSite)
-siteInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') addSite()
+openEditor.addEventListener('click', () => {
+  chrome.runtime.openOptionsPage()
 })
 
 async function init(): Promise<void> {
-  const settings = await getSettings()
   await updateGlobalToggleState()
-  renderSiteList(settings.sites)
+  await renderSitesList()
 }
 
 init()

@@ -1,6 +1,20 @@
+export interface Script {
+  id: string
+  name: string
+  type: 'js' | 'css'
+  code: string
+  enabled: boolean
+  autoRun: boolean
+  runAt: 'document_start' | 'document_end' | 'document_idle'
+  urlPatterns: string[]
+}
+
 export interface Site {
+  id: string
   domain: string
   enabled: boolean
+  cspEnabled: boolean
+  scripts: Script[]
 }
 
 export interface Headers {
@@ -20,19 +34,49 @@ export interface Settings {
   sites: Site[]
 }
 
+export const DEFAULT_HEADERS: Headers = {
+  'content-security-policy': true,
+  'content-security-policy-report-only': true,
+  'x-webkit-csp': true,
+  'x-content-security-policy': true,
+  'x-content-security-policy-report-only': true,
+  'x-webkit-csp-report-only': true,
+  'report-to': true,
+  'reporting-endpoints': true,
+}
+
 export const DEFAULT_SETTINGS: Settings = {
   enabled: false,
-  headers: {
-    'content-security-policy': true,
-    'content-security-policy-report-only': true,
-    'x-webkit-csp': true,
-    'x-content-security-policy': true,
-    'x-content-security-policy-report-only': true,
-    'x-webkit-csp-report-only': true,
-    'report-to': true,
-    'reporting-endpoints': true,
-  },
+  headers: DEFAULT_HEADERS,
   sites: [],
 }
 
 export type HeaderKey = keyof Headers
+
+export function generateId(): string {
+  return Math.random().toString(36).substring(2, 9)
+}
+
+export function createScript(partial: Partial<Script> = {}): Script {
+  return {
+    id: generateId(),
+    name: 'New Script',
+    type: 'js',
+    code: '',
+    enabled: true,
+    autoRun: false,
+    runAt: 'document_idle',
+    urlPatterns: [],
+    ...partial,
+  }
+}
+
+export function createSite(domain: string): Site {
+  return {
+    id: generateId(),
+    domain,
+    enabled: true,
+    cspEnabled: false,
+    scripts: [],
+  }
+}

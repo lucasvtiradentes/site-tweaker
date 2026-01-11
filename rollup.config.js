@@ -26,4 +26,20 @@ export default [
     },
     plugins: [typescript()],
   },
+  {
+    input: 'src/editor/editor.ts',
+    output: {
+      file: 'dist/editor.js',
+      format: 'iife',
+    },
+    plugins: [typescript()],
+  },
+  {
+    input: 'src/content/floating-ui.ts',
+    output: {
+      file: 'dist/floating-ui.js',
+      format: 'iife',
+    },
+    plugins: [typescript()],
+  },
 ]

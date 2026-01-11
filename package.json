@@ -1,7 +1,7 @@
 {
-  "name": "csp-scope",
+  "name": "website-customizer",
   "version": "1.0.0",
-  "description": "Chrome extension to selectively disable CSP headers for specific sites",
+  "description": "Customize websites with scripts, styles, and CSP management",
   "type": "module",
   "scripts": {
     "dev": "rollup -c -w",
@@ -26,8 +26,6 @@
     "typescript": "^5.7.2"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "biome check --write"
-    ]
+    "*.{ts,tsx,js,jsx}": ["biome check --write"]
   }
 }

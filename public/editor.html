@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Customizer - Editor</title>
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Sites</h1>
+        <button id="addSiteBtn" class="btn-icon" title="Add site">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+      <ul id="sitesList" class="sites-list"></ul>
+      <p id="noSites" class="empty-msg">No sites yet</p>
+    </aside>
+
+    <main class="main">
+      <div id="noSiteSelected" class="placeholder">
+        <p>Select a site from the sidebar or add a new one</p>
+      </div>
+
+      <div id="siteEditor" class="site-editor hidden">
+        <div class="site-header">
+          <h2 id="siteDomain">github.com</h2>
+          <div class="site-actions">
+            <button id="deleteSiteBtn" class="btn-danger">Delete Site</button>
+          </div>
+        </div>
+
+        <div class="scripts-header">
+          <h3>Scripts</h3>
+          <button id="addScriptBtn" class="btn-primary">+ Add Script</button>
+        </div>
+
+        <ul id="scriptsList" class="scripts-list"></ul>
+        <p id="noScriptsMsg" class="empty-msg">No scripts for this site</p>
+
+        <div id="scriptEditor" class="script-editor hidden">
+          <div class="script-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="scriptName">Name</label>
+                <input type="text" id="scriptName" placeholder="Script name">
+              </div>
+              <div class="form-group small">
+                <label for="scriptType">Type</label>
+                <select id="scriptType">
+                  <option value="js">JavaScript</option>
+                  <option value="css">CSS</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group small">
+                <label for="scriptAutoRun">Auto Run</label>
+                <select id="scriptAutoRun">
+                  <option value="false">Manual</option>
+                  <option value="true">Auto</option>
+                </select>
+              </div>
+              <div class="form-group small">
+                <label for="scriptRunAt">Run At</label>
+                <select id="scriptRunAt">
+                  <option value="document_idle">Idle</option>
+                  <option value="document_end">End</option>
+                  <option value="document_start">Start</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="scriptEnabled">Status</label>
+                <select id="scriptEnabled">
+                  <option value="true">Enabled</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="scriptUrlPatterns">URL Patterns (one per line, empty = all)</label>
+              <textarea id="scriptUrlPatterns" rows="2" placeholder="/path/*&#10;/another/path"></textarea>
+            </div>
+
+            <div class="form-group code-group">
+              <label for="scriptCode">Code</label>
+              <textarea id="scriptCode" rows="15" placeholder="// Your code here..." spellcheck="false"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button id="saveScriptBtn" class="btn-primary">Save Script</button>
+              <button id="deleteScriptBtn" class="btn-danger">Delete</button>
+              <button id="cancelScriptBtn" class="btn-secondary">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="addSiteModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>Add Site</h3>
+      <input type="text" id="newSiteDomain" placeholder="example.com">
+      <div class="modal-actions">
+        <button id="confirmAddSite" class="btn-primary">Add</button>
+        <button id="cancelAddSite" class="btn-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="editor.js"></script>
+</body>
+</html>
