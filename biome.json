@@ -1,5 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "include": ["src/**/*.ts", "src/**/*.svelte", "*.ts"],
+    "ignore": ["node_modules", "dist", ".wxt"]
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -9,6 +13,9 @@
       "recommended": true,
       "complexity": {
         "noForEach": "error"
+      },
+      "style": {
+        "useConst": "off"
       }
     }
   },

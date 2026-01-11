@@ -4,8 +4,9 @@
   "description": "Customize websites with scripts, styles, and CSP management",
   "type": "module",
   "scripts": {
-    "dev": "rollup -c -w",
-    "build": "rollup -c",
+    "dev": "wxt",
+    "build": "rimraf dist && wxt build && mv dist/chrome-mv3/* dist/ && rimraf dist/chrome-mv3 .wxt .output",
+    "zip": "rimraf dist && wxt zip && rimraf .wxt .output",
     "icons": "tsx scripts/generate-icons.ts",
     "lint": "biome check src",
     "lint:fix": "biome check --write src",
@@ -14,18 +15,20 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@rollup/plugin-typescript": "^12.1.2",
+    "@tailwindcss/vite": "^4.0.0",
     "@types/chrome": "^0.0.287",
     "@types/node": "^25.0.6",
+    "@wxt-dev/module-svelte": "^2.0.4",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
-    "rollup": "^4.29.1",
-    "rollup-plugin-copy": "^3.5.0",
-    "tslib": "^2.8.1",
+    "rimraf": "^6.1.2",
+    "svelte": "^5.19.0",
+    "tailwindcss": "^4.0.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "wxt": "^0.20.5"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["biome check --write"]
+    "*.{ts,tsx,js,jsx,svelte}": ["biome check --write"]
   }
 }

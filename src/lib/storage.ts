@@ -1,12 +1,17 @@
-import { DEFAULT_SETTINGS, type Script, type Settings, type Site, createScript, createSite } from '../configs'
+import { DEFAULT_SETTINGS, type Script, type Settings, type Site, createScript, createSite } from './configs'
 
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get('settings')
-  return result.settings ?? DEFAULT_SETTINGS
+  const stored = result.settings
+  if (!stored || !Array.isArray(stored.sites)) {
+    return DEFAULT_SETTINGS
+  }
+  return { ...DEFAULT_SETTINGS, ...stored, sites: stored.sites ?? [] }
 }
 
 export async function saveSettings(settings: Settings): Promise<void> {
-  await chrome.storage.local.set({ settings })
+  const plainSettings = JSON.parse(JSON.stringify(settings))
+  await chrome.storage.local.set({ settings: plainSettings })
 }
 
 export async function toggleGlobal(): Promise<boolean> {
