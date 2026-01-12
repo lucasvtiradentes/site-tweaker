@@ -16,7 +16,7 @@
 A browser extension to customize any website with custom scripts (JS) and styles (CSS). Inject code automatically on page load or run manually via a floating UI. Manage CSP headers, import scripts from GitHub repos, and organize everything by domain.
 
 <div align="center">
-  <a href="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo1.png" target="_blank"><img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo1.png" alt="Site Tweaker Editor"></a>
+  <a href="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo1.png" target="_blank"><img height="400" src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo1.png" alt="Site Tweaker Editor"></a>
   <br>
   <em>manage scripts and styles per domain in the editor panel</em>
 </div>
@@ -27,6 +27,14 @@ A browser extension to customize any website with custom scripts (JS) and styles
 
 <details>
 <summary>Other images</summary>
+<br />
+
+<div align="center">
+  <a href="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo2.png" target="_blank"><img src="https://cdn.jsdelivr.net/gh/lucasvtiradentes/site-tweaker@main/.github/image/demo2.png" alt="Floating UI"></a>
+  <br>
+  <em>floating UI panel for running scripts manually</em>
+</div>
+
 <br />
 
 <div align="center">
@@ -218,39 +226,6 @@ Create a `site-tweaker.config.json` in your repository:
   ]
 }
 ```
-
-<div align="center">
-
-<details>
-<summary><strong>Config Schema</strong></summary>
-<br />
-
-<div align="left">
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | string | Config version |
-| `name` | string | Source display name |
-| `description` | string | Optional description |
-| `scripts` | array | List of scripts |
-
-**Script Fields**
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `name` | string | required | Script display name |
-| `type` | `js` \| `css` | required | Script type |
-| `file` | string | required | Path to script file in repo |
-| `autoRun` | boolean | `false` | Run automatically on page load |
-| `runAt` | string | `document_idle` | When to inject |
-| `match.domains` | string[] | `[]` | Domains to match (supports `*.` wildcard) |
-| `match.paths` | string[] | `[]` | URL paths to match (supports `*` wildcard) |
-
-</div>
-
-</details>
-
-</div>
 
 ### Domain Matching
 
