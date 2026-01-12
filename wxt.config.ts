@@ -1,5 +1,6 @@
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'wxt'
+import { APP_NAME } from './src/lib/constants'
 
 export default defineConfig({
   srcDir: 'src',
@@ -10,7 +11,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   }),
   manifest: {
-    name: 'Website Customizer',
+    name: APP_NAME,
     description: 'Customize websites with scripts, styles, and CSP management',
     permissions: ['storage', 'tabs', 'scripting', 'declarativeNetRequest'],
     host_permissions: ['<all_urls>'],

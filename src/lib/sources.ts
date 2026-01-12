@@ -1,4 +1,5 @@
 import { type Source, type SourceScript, generateId } from './configs'
+import { CONFIG_FILE } from './constants'
 
 interface ParsedGitHubUrl {
   owner: string
@@ -113,7 +114,7 @@ async function fetchGitHubFile(url: string, token: string | null): Promise<strin
 }
 
 export async function fetchSourceConfig(parsed: ParsedGitHubUrl, token: string | null = null): Promise<SourceConfig> {
-  const url = buildContentsApiUrl(parsed, 'csp-scope.config.json')
+  const url = buildContentsApiUrl(parsed, CONFIG_FILE)
   const content = await fetchGitHubFile(url, token)
   const config = JSON.parse(content)
 

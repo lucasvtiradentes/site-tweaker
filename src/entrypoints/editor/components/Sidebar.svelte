@@ -1,6 +1,7 @@
 <script lang="ts">
 import { Icon } from '../../../lib/components'
 import type { Site, Source } from '../../../lib/configs'
+import { APP_NAME } from '../../../lib/constants'
 
 interface Props {
   sites: Site[]
@@ -76,7 +77,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
   <div class="p-4 border-b border-white/10">
     <div class="flex items-center gap-2">
       <Icon name="code" size={24} class="text-green-400" />
-      <span class="text-base font-semibold">Web Customizer</span>
+      <span class="text-base font-semibold">{APP_NAME}</span>
     </div>
   </div>
 

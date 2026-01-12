@@ -1,6 +1,7 @@
 <script lang="ts">
 import { EmptyState, Icon } from '../../../lib/components'
 import type { Source, SourceScript } from '../../../lib/configs'
+import { CONFIG_FILE } from '../../../lib/constants'
 import { getDisplayUrl } from '../../../lib/sources'
 import { formatDate } from '../../../lib/utils'
 import ScriptList from './ScriptList.svelte'
@@ -120,7 +121,7 @@ function cancelEditToken() {
         <EmptyState
           icon="file"
           title="No scripts in this source"
-          description="Check the repository's csp-scope.config.json"
+          description={`Check the repository's ${CONFIG_FILE}`}
         />
       {:else}
         <div class="space-y-5">

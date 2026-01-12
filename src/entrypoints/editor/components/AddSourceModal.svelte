@@ -1,5 +1,6 @@
 <script lang="ts">
 import { Icon, Modal } from '../../../lib/components'
+import { CONFIG_FILE } from '../../../lib/constants'
 import { parseGitHubUrl } from '../../../lib/sources'
 
 interface Props {
@@ -53,7 +54,7 @@ function handleInput() {
 <Modal title="Add Source" width="min-w-[450px]">
   {#snippet children()}
     <p class="text-[12px] text-gray-500 mb-4">
-      Enter a GitHub repository URL. The repo must contain a <code class="text-green-400">csp-scope.config.json</code> file.
+      Enter a GitHub repository URL. The repo must contain a <code class="text-green-400">{CONFIG_FILE}</code> file.
     </p>
 
     <div class="mb-3">
