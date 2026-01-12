@@ -24,7 +24,7 @@ function createToggleIcon(enabled: boolean): string {
 const headerEntries = $derived(Object.entries(headers) as [HeaderKey, boolean][])
 </script>
 
-<ul class="list-none max-h-[280px] overflow-y-auto">
+<ul class="list-none max-h-70 overflow-y-auto">
   {#each headerEntries as [header, enabled] (header)}
     <li class="flex items-center justify-between py-2 border-b border-white/5 last:border-b-0">
       <span class="text-xs font-mono text-gray-400">{header}</span>

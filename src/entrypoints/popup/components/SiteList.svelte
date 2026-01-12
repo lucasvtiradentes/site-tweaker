@@ -14,7 +14,7 @@ const { sites, onToggleCsp }: Props = $props()
     No sites configured yet.<br>Click "Open Editor" to add sites.
   </p>
 {:else}
-  <ul class="list-none max-h-[250px] overflow-y-auto">
+  <ul class="list-none max-h-50 overflow-y-auto">
     {#each sites as site (site.id)}
       <li class="flex items-center justify-between p-2.5 px-3 rounded-md mb-1 bg-white/[0.03] transition-all hover:bg-white/[0.06]">
         <div class="flex flex-col gap-0.5 min-w-0 flex-1">

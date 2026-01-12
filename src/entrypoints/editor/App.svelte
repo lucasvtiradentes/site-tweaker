@@ -3,8 +3,7 @@ import { type Script, type Settings, type Site, createScript, createSite } from 
 import { getSettings, saveSettings } from '../../lib/storage'
 import AddSiteModal from './components/AddSiteModal.svelte'
 import ScriptEditor from './components/ScriptEditor.svelte'
-import ScriptsList from './components/ScriptsList.svelte'
-import SitesList from './components/SitesList.svelte'
+import TreeView from './components/TreeView.svelte'
 
 let settings = $state<Settings | null>(null)
 let currentSite = $state<Site | null>(null)
@@ -35,13 +34,20 @@ async function selectSite(siteId: string) {
   isNewScript = false
 }
 
-function selectScript(scriptId: string) {
-  if (!currentSite) return
-  currentScript = currentSite.scripts.find((s) => s.id === scriptId) ?? null
+function selectScript(siteId: string, scriptId: string) {
+  if (!settings) return
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return
+  currentSite = site
+  currentScript = site.scripts.find((s) => s.id === scriptId) ?? null
   isNewScript = false
 }
 
-function addScript() {
+function addScript(siteId: string) {
+  if (!settings) return
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return
+  currentSite = site
   isNewScript = true
   currentScript = null
 }
@@ -65,14 +71,19 @@ async function handleAddSite(domain: string) {
   await selectSite(newSite.id)
 }
 
-async function deleteSite() {
-  if (!settings || !currentSite) return
-  if (!confirm(`Delete site "${currentSite.domain}" and all its scripts?`)) return
+async function deleteSite(siteId: string) {
+  if (!settings) return
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return
+  if (!confirm(`Delete site "${site.domain}" and all its scripts?`)) return
 
-  settings.sites = settings.sites.filter((s) => s.id !== currentSite?.id)
+  settings.sites = settings.sites.filter((s) => s.id !== siteId)
   await saveSettings(settings)
-  currentSite = null
-  currentScript = null
+
+  if (currentSite?.id === siteId) {
+    currentSite = null
+    currentScript = null
+  }
 }
 
 async function saveScript(scriptData: Partial<Script>) {
@@ -120,73 +131,46 @@ function cancelEdit() {
 </script>
 
 <div class="flex h-screen bg-[#0f0f1a] text-gray-100 font-sans text-sm overflow-hidden">
-  <aside class="w-[250px] bg-[#1a1a2e] border-r border-white/10 flex flex-col">
-    <div class="flex items-center justify-between p-4 border-b border-white/10">
-      <h1 class="text-base font-semibold">Sites</h1>
-      <button
-        onclick={() => showAddSiteModal = true}
-        class="bg-transparent border-none cursor-pointer p-1.5 rounded-md text-gray-500 transition-all hover:bg-white/10 hover:text-white"
-        title="Add site"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-      </button>
-    </div>
+  <aside class="w-[280px] bg-[#1a1a2e] border-r border-white/10 flex flex-col">
     {#if settings}
-      <SitesList
+      <TreeView
         sites={settings.sites}
         currentSiteId={currentSite?.id ?? null}
-        onSelect={selectSite}
+        currentScriptId={currentScript?.id ?? null}
+        onSelectSite={selectSite}
+        onSelectScript={selectScript}
+        onAddSite={() => showAddSiteModal = true}
+        onAddScript={addScript}
+        onDeleteSite={deleteSite}
       />
     {/if}
   </aside>
 
   <main class="flex-1 flex flex-col overflow-hidden">
-    {#if !currentSite}
-      <div class="flex-1 flex items-center justify-center text-gray-600">
-        <p>Select a site from the sidebar or add a new one</p>
+    {#if currentScript || isNewScript}
+      <div class="flex items-center gap-3 p-4 px-6 border-b border-white/10 bg-[#1a1a2e]">
+        <span class="text-gray-500 text-[13px]">{currentSite?.domain}</span>
+        <span class="text-gray-600">/</span>
+        <span class="text-white font-medium">{isNewScript ? 'New Script' : currentScript?.name}</span>
       </div>
+      <ScriptEditor
+        script={currentScript}
+        isNew={isNewScript}
+        onSave={saveScript}
+        onDelete={deleteScript}
+        onCancel={cancelEdit}
+      />
     {:else}
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex items-center justify-between p-4 px-6 border-b border-white/10 bg-[#1a1a2e]">
-          <h2 class="text-lg font-semibold">{currentSite.domain}</h2>
-          <div class="flex gap-2">
-            <button
-              onclick={deleteSite}
-              class="px-5 py-2.5 bg-red-500/20 border-none rounded-md text-red-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-red-500/30"
-            >
-              Delete Site
-            </button>
-          </div>
+      <div class="flex-1 flex items-center justify-center text-gray-600">
+        <div class="text-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-16 h-16 mx-auto mb-4 opacity-30">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <p>Select a script to edit or create a new one</p>
         </div>
-
-        <div class="flex items-center justify-between p-4 px-6 border-b border-white/10">
-          <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Scripts</h3>
-          <button
-            onclick={addScript}
-            class="px-5 py-2.5 bg-green-400 border-none rounded-md text-black text-[13px] font-semibold cursor-pointer transition-all hover:bg-green-500"
-          >
-            + Add Script
-          </button>
-        </div>
-
-        <ScriptsList
-          scripts={currentSite.scripts}
-          currentScriptId={currentScript?.id ?? null}
-          onSelect={selectScript}
-        />
-
-        {#if currentScript || isNewScript}
-          <ScriptEditor
-            script={currentScript}
-            isNew={isNewScript}
-            onSave={saveScript}
-            onDelete={deleteScript}
-            onCancel={cancelEdit}
-          />
-        {/if}
       </div>
     {/if}
   </main>
