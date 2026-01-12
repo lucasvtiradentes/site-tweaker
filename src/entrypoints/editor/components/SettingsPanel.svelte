@@ -1,5 +1,6 @@
 <script lang="ts">
-import type { HeaderKey, Headers, Settings } from '../../../lib/configs'
+import { SettingRow, Toggle } from '../../../lib/components'
+import type { HeaderKey, Settings } from '../../../lib/configs'
 import { saveSettings } from '../../../lib/storage'
 
 interface Props {
@@ -51,50 +52,29 @@ async function toggleHeader(header: HeaderKey) {
 
     <section class="mb-8">
       <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-4">Extension</h3>
-      <div class="flex items-center justify-between p-3 rounded-lg bg-white/5">
-        <div>
-          <div class="text-[13px] font-medium">Enable Extension</div>
-          <div class="text-[11px] text-gray-500">Master switch for all extension features</div>
-        </div>
-        <button
-          onclick={toggleEnabled}
-          aria-label="Toggle extension"
-          class="relative w-11 h-6 rounded-full transition-all cursor-pointer {settings.enabled ? 'bg-green-500' : 'bg-gray-600'}"
-        >
-          <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all {settings.enabled ? 'left-6' : 'left-1'}"></div>
-        </button>
-      </div>
+      <SettingRow
+        title="Enable Extension"
+        description="Master switch for all extension features"
+        checked={settings.enabled}
+        onToggle={toggleEnabled}
+      />
     </section>
 
     <section class="mb-8">
       <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-4">Features</h3>
       <div class="space-y-2">
-        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5">
-          <div>
-            <div class="text-[13px] font-medium">Floating UI</div>
-            <div class="text-[11px] text-gray-500">Show floating button to run manual scripts</div>
-          </div>
-          <button
-            onclick={toggleFloatingUi}
-            aria-label="Toggle floating UI"
-            class="relative w-11 h-6 rounded-full transition-all cursor-pointer {settings.floatingUiEnabled ? 'bg-green-500' : 'bg-gray-600'}"
-          >
-            <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all {settings.floatingUiEnabled ? 'left-6' : 'left-1'}"></div>
-          </button>
-        </div>
-        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5">
-          <div>
-            <div class="text-[13px] font-medium">Auto-inject Scripts</div>
-            <div class="text-[11px] text-gray-500">Automatically run scripts marked as auto-run</div>
-          </div>
-          <button
-            onclick={toggleAutoInject}
-            aria-label="Toggle auto-inject"
-            class="relative w-11 h-6 rounded-full transition-all cursor-pointer {settings.autoInjectEnabled ? 'bg-green-500' : 'bg-gray-600'}"
-          >
-            <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all {settings.autoInjectEnabled ? 'left-6' : 'left-1'}"></div>
-          </button>
-        </div>
+        <SettingRow
+          title="Floating UI"
+          description="Show floating button to run manual scripts"
+          checked={settings.floatingUiEnabled}
+          onToggle={toggleFloatingUi}
+        />
+        <SettingRow
+          title="Auto-inject Scripts"
+          description="Automatically run scripts marked as auto-run"
+          checked={settings.autoInjectEnabled}
+          onToggle={toggleAutoInject}
+        />
       </div>
     </section>
 
@@ -106,13 +86,7 @@ async function toggleHeader(header: HeaderKey) {
           {@const header = key as HeaderKey}
           <div class="flex items-center justify-between p-2.5 rounded-lg bg-white/5">
             <span class="text-[12px] font-mono text-gray-400">{label}</span>
-            <button
-              onclick={() => toggleHeader(header)}
-              aria-label="Toggle {label}"
-              class="relative w-9 h-5 rounded-full transition-all cursor-pointer {settings.headers[header] ? 'bg-green-500' : 'bg-gray-600'}"
-            >
-              <div class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all {settings.headers[header] ? 'left-[18px]' : 'left-0.5'}"></div>
-            </button>
+            <Toggle checked={settings.headers[header]} onToggle={() => toggleHeader(header)} label="Toggle {label}" size="sm" />
           </div>
         {/each}
       </div>

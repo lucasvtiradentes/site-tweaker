@@ -9,7 +9,8 @@ import {
   createSite,
   createSource,
 } from './configs'
-import { refreshSource as fetchAndRefreshSource, getMatchingSourceScripts as matchSourceScripts } from './sources'
+import { refreshSource as fetchAndRefreshSource, getMatchingSourceScripts } from './sources'
+import { normalizeDomain } from './utils'
 
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get('settings')
@@ -30,33 +31,25 @@ export async function saveSettings(settings: Settings): Promise<void> {
   await chrome.storage.local.set({ settings: plainSettings })
 }
 
-export async function toggleGlobal(): Promise<boolean> {
+type ToggleableKey = 'enabled' | 'floatingUiEnabled' | 'autoInjectEnabled'
+
+async function toggleSettingKey(key: ToggleableKey): Promise<boolean> {
   const settings = await getSettings()
-  settings.enabled = !settings.enabled
+  settings[key] = !settings[key]
   await saveSettings(settings)
-  return settings.enabled
+  return settings[key]
 }
 
-export async function toggleFloatingUi(): Promise<boolean> {
-  const settings = await getSettings()
-  settings.floatingUiEnabled = !settings.floatingUiEnabled
-  await saveSettings(settings)
-  return settings.floatingUiEnabled
+export function toggleGlobal(): Promise<boolean> {
+  return toggleSettingKey('enabled')
 }
 
-export async function toggleAutoInject(): Promise<boolean> {
-  const settings = await getSettings()
-  settings.autoInjectEnabled = !settings.autoInjectEnabled
-  await saveSettings(settings)
-  return settings.autoInjectEnabled
+export function toggleFloatingUi(): Promise<boolean> {
+  return toggleSettingKey('floatingUiEnabled')
 }
 
-export function normalizeDomain(input: string): string {
-  let domain = input.trim().toLowerCase()
-  domain = domain.replace(/^https?:\/\//, '')
-  domain = domain.replace(/\/.*$/, '')
-  domain = domain.replace(/^www\./, '')
-  return domain
+export function toggleAutoInject(): Promise<boolean> {
+  return toggleSettingKey('autoInjectEnabled')
 }
 
 export async function getSiteByDomain(domain: string): Promise<Site | undefined> {
@@ -208,9 +201,7 @@ export async function refreshSource(sourceId: string): Promise<Source | null> {
 
 export async function refreshAllSources(): Promise<void> {
   const settings = await getSettings()
-  for (let i = 0; i < settings.sources.length; i++) {
-    settings.sources[i] = await fetchAndRefreshSource(settings.sources[i])
-  }
+  settings.sources = await Promise.all(settings.sources.map(fetchAndRefreshSource))
   await saveSettings(settings)
 }
 
@@ -241,6 +232,5 @@ export async function updateSourceToken(sourceId: string, token: string | null):
   return source
 }
 
-export function getMatchingSourceScripts(sources: Source[], domain: string, path: string): SourceScript[] {
-  return matchSourceScripts(sources, domain, path)
-}
+export { getMatchingSourceScripts, normalizeDomain }
+export type { Script, Settings, Site, Source, SourceScript }

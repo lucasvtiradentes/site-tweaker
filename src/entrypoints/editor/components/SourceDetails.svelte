@@ -1,6 +1,8 @@
 <script lang="ts">
+import { EmptyState, Icon } from '../../../lib/components'
 import type { Source, SourceScript } from '../../../lib/configs'
 import { getDisplayUrl } from '../../../lib/sources'
+import { formatDate } from '../../../lib/utils'
 import ScriptList from './ScriptList.svelte'
 
 interface Props {
@@ -38,11 +40,6 @@ const scriptsByDomain = $derived<DomainGroup[]>(() => {
     .map(([domain, scripts]) => ({ domain, scripts }))
 })
 
-function formatDate(timestamp: number | null): string {
-  if (!timestamp) return 'Never'
-  return new Date(timestamp).toLocaleString()
-}
-
 async function handleRefresh() {
   refreshing = true
   await onRefresh()
@@ -69,16 +66,14 @@ function cancelEditToken() {
   <div class="max-w-[800px]">
     <div class="flex items-center gap-3 mb-6">
       <button onclick={onBack} aria-label="Go back" class="text-gray-500 hover:text-white transition-all">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><polyline points="15 18 9 12 15 6"/></svg>
+        <Icon name="chevron-left" size={20} />
       </button>
       <div class="flex-1">
         <h2 class="text-lg font-semibold">{source.name || 'Unnamed Source'}</h2>
         <div class="text-[12px] text-gray-500">{getDisplayUrl(source.url)}</div>
       </div>
       <button onclick={handleRefresh} disabled={refreshing} class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/5 text-gray-300 text-[12px] font-medium cursor-pointer transition-all hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 {refreshing ? 'animate-spin' : ''}">
-          <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-        </svg>
+        <Icon name="refresh" size={16} class={refreshing ? 'animate-spin' : ''} />
         {refreshing ? 'Refreshing...' : 'Refresh'}
       </button>
     </div>
@@ -100,9 +95,7 @@ function cancelEditToken() {
           <div class="flex items-center gap-2 mb-2">
             <input type={showToken ? 'text' : 'password'} bind:value={tokenValue} placeholder="ghp_xxxx... (leave empty to remove)" class="flex-1 px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[12px] focus:outline-none focus:border-green-400 font-mono" />
             <button onclick={() => showToken = !showToken} class="p-2 text-gray-500 hover:text-gray-300">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                {#if showToken}<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>{:else}<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>{/if}
-              </svg>
+              <Icon name={showToken ? 'eye-off' : 'eye'} size={16} />
             </button>
           </div>
           <div class="flex gap-2">
@@ -124,13 +117,11 @@ function cancelEditToken() {
       <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-4">Scripts ({source.scripts.length})</h3>
 
       {#if source.scripts.length === 0}
-        <div class="text-center py-8 text-gray-500">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 mx-auto mb-3 opacity-30">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
-          </svg>
-          <p class="text-[13px]">No scripts in this source</p>
-          <p class="text-[11px] text-gray-600">Check the repository's csp-scope.config.json</p>
-        </div>
+        <EmptyState
+          icon="file"
+          title="No scripts in this source"
+          description="Check the repository's csp-scope.config.json"
+        />
       {:else}
         <div class="space-y-5">
           {#each scriptsByDomain() as group (group.domain)}

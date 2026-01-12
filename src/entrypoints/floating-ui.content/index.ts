@@ -1,32 +1,11 @@
 import { mount, unmount } from 'svelte'
+import type { Script, Site, SourceScript } from '../../lib/configs'
+import { MSG } from '../../lib/messages'
+import { extractDomain } from '../../lib/utils'
 import App from './App.svelte'
 import styles from './style.css?inline'
 
-interface Script {
-  id: string
-  name: string
-  type: 'js' | 'css'
-  enabled: boolean
-  autoRun: boolean
-}
-
-interface SourceScript {
-  id: string
-  name: string
-  type: 'js' | 'css'
-  autoRun: boolean
-  enabled: boolean
-  sourceId: string
-}
-
-interface Site {
-  id: string
-  domain: string
-  enabled: boolean
-  scripts: Script[]
-}
-
-interface SiteData {
+export interface SiteData {
   site: Site | null
   scripts: Script[]
   sourceScripts: SourceScript[]
@@ -34,22 +13,13 @@ interface SiteData {
 
 const CONTAINER_ID = 'wc-floating-ui'
 
-function extractDomain(url: string): string {
-  try {
-    const hostname = new URL(url).hostname
-    return hostname.replace(/^www\./, '')
-  } catch {
-    return ''
-  }
-}
-
 async function getSiteData(): Promise<SiteData | null> {
   const url = new URL(window.location.href)
   const path = url.pathname + url.search
   return new Promise((resolve) => {
     chrome.runtime.sendMessage(
       {
-        type: 'GET_SITE_DATA',
+        type: MSG.GET_SITE_DATA,
         domain: extractDomain(window.location.href),
         path,
       },

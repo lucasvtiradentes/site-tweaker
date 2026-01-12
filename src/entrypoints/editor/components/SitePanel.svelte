@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Icon, Toggle } from '../../../lib/components'
 import type { Site, SourceScript } from '../../../lib/configs'
 import ScriptList from './ScriptList.svelte'
 
@@ -37,9 +38,7 @@ const {
         <h2 class="text-lg font-semibold">{site.domain}</h2>
       </div>
       <button onclick={onDeleteSite} class="flex items-center gap-2 px-3 py-2 rounded-md bg-red-500/10 text-red-400 text-[12px] font-medium cursor-pointer transition-all hover:bg-red-500/20">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
+        <Icon name="trash" size={16} />
         Delete Site
       </button>
     </div>
@@ -50,9 +49,7 @@ const {
           <div class="text-[13px] font-medium">CSP Bypass</div>
           <div class="text-[11px] text-gray-500">Remove CSP headers for this site (uses global config)</div>
         </div>
-        <button onclick={onToggleCsp} aria-label="Toggle CSP bypass" class="relative w-11 h-6 rounded-full transition-all cursor-pointer {site.cspEnabled ? 'bg-green-500' : 'bg-gray-600'}">
-          <div class="absolute top-1 w-4 h-4 rounded-full bg-white transition-all {site.cspEnabled ? 'left-6' : 'left-1'}"></div>
-        </button>
+        <Toggle checked={site.cspEnabled} onToggle={onToggleCsp} label="Toggle CSP bypass" />
       </div>
     </section>
 
@@ -60,9 +57,7 @@ const {
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Scripts & Styles</h3>
         <button onclick={onAddScript} class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-green-500 text-black text-[12px] font-semibold cursor-pointer transition-all hover:bg-green-400">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <Icon name="plus" size={16} />
           Add
         </button>
       </div>

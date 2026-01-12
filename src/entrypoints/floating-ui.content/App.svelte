@@ -1,33 +1,7 @@
 <script lang="ts">
-interface Script {
-  id: string
-  name: string
-  type: 'js' | 'css'
-  enabled: boolean
-  autoRun: boolean
-}
-
-interface SourceScript {
-  id: string
-  name: string
-  type: 'js' | 'css'
-  autoRun: boolean
-  enabled: boolean
-  sourceId: string
-}
-
-interface Site {
-  id: string
-  domain: string
-  enabled: boolean
-  scripts: Script[]
-}
-
-interface SiteData {
-  site: Site | null
-  scripts: Script[]
-  sourceScripts: SourceScript[]
-}
+import type { Script, SourceScript } from '../../lib/configs'
+import { MSG } from '../../lib/messages'
+import type { SiteData } from './index'
 
 interface Props {
   siteData: SiteData
@@ -46,7 +20,7 @@ async function executeScript(scriptId: string) {
   if (!siteData.site) return
   runningScriptId = scriptId
   await new Promise<void>((resolve) => {
-    chrome.runtime.sendMessage({ type: 'EXECUTE_SCRIPT', siteId: siteData.site?.id, scriptId, tabId: null }, () =>
+    chrome.runtime.sendMessage({ type: MSG.EXECUTE_SCRIPT, siteId: siteData.site?.id, scriptId, tabId: null }, () =>
       resolve(),
     )
   })
@@ -58,7 +32,7 @@ async function executeScript(scriptId: string) {
 async function executeSourceScript(sourceId: string, scriptId: string) {
   runningScriptId = scriptId
   await new Promise<void>((resolve) => {
-    chrome.runtime.sendMessage({ type: 'EXECUTE_SOURCE_SCRIPT', sourceId, scriptId, tabId: null }, () => resolve())
+    chrome.runtime.sendMessage({ type: MSG.EXECUTE_SOURCE_SCRIPT, sourceId, scriptId, tabId: null }, () => resolve())
   })
   setTimeout(() => {
     runningScriptId = null

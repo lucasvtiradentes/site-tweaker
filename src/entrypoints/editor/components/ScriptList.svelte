@@ -1,4 +1,5 @@
 <script lang="ts">
+import { EmptyState } from '../../../lib/components'
 import type { Script, SourceScript } from '../../../lib/configs'
 import ScriptItem from './ScriptItem.svelte'
 
@@ -32,13 +33,7 @@ const isEmpty = $derived(!hasScripts && !hasStyles)
 </script>
 
 {#if isEmpty}
-  <div class="text-center py-8 text-gray-500">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-12 h-12 mx-auto mb-3 opacity-30">
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
-      <polyline points="14 2 14 8 20 8"/>
-    </svg>
-    <p class="text-[13px]">No scripts</p>
-  </div>
+  <EmptyState icon="file" title="No scripts" />
 {:else}
   <div class="space-y-4">
     <section>

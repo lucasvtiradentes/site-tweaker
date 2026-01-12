@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Icon, Modal } from '../../../lib/components'
 import { parseGitHubUrl } from '../../../lib/sources'
 
 interface Props {
@@ -49,13 +50,8 @@ function handleInput() {
 }
 </script>
 
-<div
-  class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000]"
-  role="dialog"
-  aria-modal="true"
->
-  <div class="bg-[#1a1a2e] rounded-xl p-6 min-w-[450px]">
-    <h3 class="mb-2 text-base font-semibold">Add Source</h3>
+<Modal title="Add Source" width="min-w-[450px]">
+  {#snippet children()}
     <p class="text-[12px] text-gray-500 mb-4">
       Enter a GitHub repository URL. The repo must contain a <code class="text-green-400">csp-scope.config.json</code> file.
     </p>
@@ -79,8 +75,9 @@ function handleInput() {
         <button
           type="button"
           onclick={() => showToken = !showToken}
-          class="text-[10px] text-gray-500 hover:text-gray-300"
+          class="text-[10px] text-gray-500 hover:text-gray-300 flex items-center gap-1"
         >
+          <Icon name={showToken ? 'eye-off' : 'eye'} size={12} />
           {showToken ? 'Hide' : 'Show'}
         </button>
       </div>
@@ -104,22 +101,21 @@ function handleInput() {
     {:else}
       <p class="h-[18px] mb-3"></p>
     {/if}
-
-    <div class="flex gap-3 justify-end">
-      <button
-        onclick={handleConfirm}
-        disabled={!isValid() || loading}
-        class="px-5 py-2.5 bg-green-400 border-none rounded-md text-black text-[13px] font-semibold cursor-pointer transition-all hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Adding...' : 'Add'}
-      </button>
-      <button
-        onclick={onCancel}
-        disabled={loading}
-        class="px-5 py-2.5 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-</div>
+  {/snippet}
+  {#snippet actions()}
+    <button
+      onclick={handleConfirm}
+      disabled={!isValid() || loading}
+      class="px-5 py-2.5 bg-green-400 border-none rounded-md text-black text-[13px] font-semibold cursor-pointer transition-all hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {loading ? 'Adding...' : 'Add'}
+    </button>
+    <button
+      onclick={onCancel}
+      disabled={loading}
+      class="px-5 py-2.5 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      Cancel
+    </button>
+  {/snippet}
+</Modal>

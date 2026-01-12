@@ -1,0 +1,8 @@
+export const MSG = {
+  EXECUTE_SCRIPT: 'EXECUTE_SCRIPT',
+  EXECUTE_SOURCE_SCRIPT: 'EXECUTE_SOURCE_SCRIPT',
+  GET_SITE_DATA: 'GET_SITE_DATA',
+  GET_CURRENT_TAB_INFO: 'GET_CURRENT_TAB_INFO',
+} as const
+
+export type MessageType = (typeof MSG)[keyof typeof MSG]

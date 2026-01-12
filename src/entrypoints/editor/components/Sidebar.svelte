@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Icon } from '../../../lib/components'
 import type { Site, Source } from '../../../lib/configs'
 
 interface Props {
@@ -74,10 +75,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
 <div class="flex flex-col h-full">
   <div class="p-4 border-b border-white/10">
     <div class="flex items-center gap-2">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-green-400">
-        <path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.25C16.6 22.15 20 17.25 20 12V6l-8-4z"/>
-        <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <Icon name="shield" size={24} class="text-green-400" />
       <span class="text-base font-semibold">CSP Scope</span>
     </div>
   </div>
@@ -86,9 +84,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
     <div class="p-3 px-4 flex items-center justify-between">
       <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Sites</span>
       <button onclick={onAddSite} class="p-1 rounded text-gray-500 hover:text-white hover:bg-white/10 transition-all" title="Add site">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
+        <Icon name="plus" size={16} />
       </button>
     </div>
 
@@ -121,9 +117,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
       onclick={onSelectSources}
       class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all {currentView === 'sources' || currentView === 'source' ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-      </svg>
+      <Icon name="github" size={16} />
       <span class="text-[13px] font-medium">Sources</span>
       {#if sources.length > 0}
         <span class="ml-auto text-[10px] text-gray-600">{sources.length}</span>
@@ -136,10 +130,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
       onclick={onSelectSettings}
       class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all {currentView === 'settings' ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
+      <Icon name="settings" size={16} />
       <span class="text-[13px] font-medium">Settings</span>
     </button>
   </div>

@@ -19,6 +19,7 @@ import {
   toggleSourceScript,
   updateSourceToken,
 } from '../../lib/storage'
+import { normalizeDomain } from '../../lib/utils'
 import AddSiteModal from './components/AddSiteModal.svelte'
 import AddSourceModal from './components/AddSourceModal.svelte'
 import ScriptEditor from './components/ScriptEditor.svelte'
@@ -62,14 +63,6 @@ $effect(() => {
 
 async function loadSettings() {
   settings = await getSettings()
-}
-
-function normalizeDomain(input: string): string {
-  let domain = input.trim().toLowerCase()
-  domain = domain.replace(/^https?:\/\//, '')
-  domain = domain.replace(/\/.*$/, '')
-  domain = domain.replace(/^www\./, '')
-  return domain
 }
 
 function selectSettings() {

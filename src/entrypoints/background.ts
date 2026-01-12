@@ -1,5 +1,7 @@
 import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings, type SourceScript } from '../lib/configs'
-import { matchesDomainPattern, matchesPathPattern } from '../lib/sources'
+import { MSG } from '../lib/messages'
+import { getMatchingSourceScripts, matchesDomainPattern, matchesPathPattern } from '../lib/sources'
+import { extractDomain } from '../lib/utils'
 
 export default defineBackground(() => {
   let isUpdating = false
@@ -27,15 +29,6 @@ export default defineBackground(() => {
     return (Object.entries(settings.headers) as [HeaderKey, boolean][])
       .filter(([, enabled]) => enabled)
       .map(([header]) => header)
-  }
-
-  function extractDomain(url: string): string | null {
-    try {
-      const hostname = new URL(url).hostname
-      return hostname.replace(/^www\./, '')
-    } catch {
-      return null
-    }
   }
 
   type IconState = 'active' | 'outline' | 'disabled'
@@ -167,18 +160,6 @@ export default defineBackground(() => {
     }
   }
 
-  function getMatchingSourceScripts(settings: Settings, domain: string, path: string): SourceScript[] {
-    return settings.sources
-      .filter((s) => s.enabled)
-      .flatMap((s) => s.scripts)
-      .filter(
-        (script) =>
-          script.enabled &&
-          script.domains.some((d) => matchesDomainPattern(domain, d)) &&
-          matchesPathPattern(path, script.paths),
-      )
-  }
-
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
     const settings = await getSettings()
     if (!settings.enabled || !settings.autoInjectEnabled) return
@@ -198,7 +179,7 @@ export default defineBackground(() => {
       }
     }
 
-    const sourceScripts = getMatchingSourceScripts(settings, domain, path)
+    const sourceScripts = getMatchingSourceScripts(settings.sources, domain, path)
     for (const script of sourceScripts) {
       if (!script.autoRun) continue
       await injectScript(tabId, script)
@@ -266,7 +247,7 @@ export default defineBackground(() => {
   })
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg.type === 'EXECUTE_SCRIPT') {
+    if (msg.type === MSG.EXECUTE_SCRIPT) {
       const tabId = msg.tabId ?? sender.tab?.id
       if (!tabId) {
         sendResponse({ success: false, error: 'No tab ID' })
@@ -275,7 +256,7 @@ export default defineBackground(() => {
       executeManualScript(msg.siteId, msg.scriptId, tabId).then(sendResponse)
       return true
     }
-    if (msg.type === 'EXECUTE_SOURCE_SCRIPT') {
+    if (msg.type === MSG.EXECUTE_SOURCE_SCRIPT) {
       const tabId = msg.tabId ?? sender.tab?.id
       if (!tabId) {
         sendResponse({ success: false, error: 'No tab ID' })
@@ -284,7 +265,7 @@ export default defineBackground(() => {
       executeSourceScript(msg.sourceId, msg.scriptId, tabId).then(sendResponse)
       return true
     }
-    if (msg.type === 'GET_CURRENT_TAB_INFO') {
+    if (msg.type === MSG.GET_CURRENT_TAB_INFO) {
       chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
         const tab = tabs[0]
         if (tab?.url) {
@@ -296,7 +277,7 @@ export default defineBackground(() => {
       })
       return true
     }
-    if (msg.type === 'GET_SITE_DATA') {
+    if (msg.type === MSG.GET_SITE_DATA) {
       getSettings().then((settings) => {
         if (!settings.enabled || !settings.floatingUiEnabled) {
           sendResponse(null)
@@ -304,7 +285,7 @@ export default defineBackground(() => {
         }
         const site = settings.sites.find((s) => s.domain === msg.domain && s.enabled)
         const path = msg.path || '/'
-        const sourceScripts = getMatchingSourceScripts(settings, msg.domain, path)
+        const sourceScripts = getMatchingSourceScripts(settings.sources, msg.domain, path)
         if (!site && sourceScripts.length === 0) {
           sendResponse(null)
           return

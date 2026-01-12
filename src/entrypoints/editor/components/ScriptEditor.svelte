@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Icon, Toggle } from '../../../lib/components'
 import type { Script, SourceScript } from '../../../lib/configs'
 
 interface Props {
@@ -105,6 +106,14 @@ function handleKeydown(e: KeyboardEvent) {
     })
   }
 }
+
+function handleToggle() {
+  if (isNew) {
+    enabled = !enabled
+  } else {
+    onToggleEnabled()
+  }
+}
 </script>
 
 <div class="flex-1 flex overflow-hidden">
@@ -189,19 +198,8 @@ function handleKeydown(e: KeyboardEvent) {
 
     {#if !readonly}
       <div class="flex items-center justify-between">
-        <button
-          onclick={() => {
-            if (isNew) {
-              enabled = !enabled
-            } else {
-              onToggleEnabled()
-            }
-          }}
-          class="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
-        >
-          <div class="relative w-9 h-5 rounded-full transition-all {enabled ? 'bg-green-500' : 'bg-gray-600'}">
-            <div class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all {enabled ? 'left-[18px]' : 'left-0.5'}"></div>
-          </div>
+        <button onclick={handleToggle} class="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0">
+          <Toggle checked={enabled} onToggle={handleToggle} label="Toggle script" size="sm" />
           <span class="text-[12px] {enabled ? 'text-green-400' : 'text-gray-500'}">{enabled ? 'On' : 'Off'}</span>
         </button>
         {#if !isNew}
@@ -210,10 +208,7 @@ function handleKeydown(e: KeyboardEvent) {
             class="p-1.5 rounded-md bg-transparent border-none cursor-pointer text-gray-500 transition-all hover:bg-red-500/20 hover:text-red-400"
             title="Delete script"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-              <polyline points="3 6 5 6 21 6"/>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
+            <Icon name="trash" size={16} />
           </button>
         {/if}
       </div>
