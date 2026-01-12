@@ -166,6 +166,11 @@ async function toggleScript(siteId: string, scriptId: string) {
     currentScript = script
   }
 }
+
+async function toggleCurrentScriptEnabled() {
+  if (!currentSite || !currentScript) return
+  await toggleScript(currentSite.id, currentScript.id)
+}
 </script>
 
 <div class="flex h-screen bg-[#0f0f1a] text-gray-100 font-sans text-sm overflow-hidden">
@@ -199,6 +204,7 @@ async function toggleScript(siteId: string, scriptId: string) {
         onSave={saveScript}
         onDelete={deleteScript}
         onCancel={cancelEdit}
+        onToggleEnabled={toggleCurrentScriptEnabled}
       />
     {:else}
       <div class="flex-1 flex items-center justify-center text-gray-600">

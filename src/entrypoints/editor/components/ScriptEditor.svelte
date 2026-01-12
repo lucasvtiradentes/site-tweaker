@@ -7,9 +7,10 @@ interface Props {
   onSave: (data: Partial<Script>) => void
   onDelete: () => void
   onCancel: () => void
+  onToggleEnabled: () => void
 }
 
-const { script, isNew, onSave, onDelete, onCancel }: Props = $props()
+const { script, isNew, onSave, onDelete, onCancel, onToggleEnabled }: Props = $props()
 
 let name = $state('')
 let type = $state<'js' | 'css'>('js')
@@ -37,6 +38,21 @@ $effect(() => {
     urlPatterns = ''
     code = ''
   }
+})
+
+const hasChanges = $derived(() => {
+  if (isNew) {
+    return name.trim() !== '' || code.trim() !== '' || urlPatterns.trim() !== ''
+  }
+  if (!script) return false
+  return (
+    name !== script.name ||
+    type !== script.type ||
+    autoRun !== script.autoRun ||
+    runAt !== script.runAt ||
+    urlPatterns !== script.urlPatterns.join('\n') ||
+    code !== script.code
+  )
 })
 
 function handleSave() {
@@ -126,17 +142,35 @@ function handleKeydown(e: KeyboardEvent) {
       ></textarea>
     </label>
 
-    <button
-      onclick={() => enabled = !enabled}
-      class="flex items-center gap-2 px-3 py-2 rounded-md border transition-all cursor-pointer {enabled ? 'bg-green-500/20 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}"
-    >
-      <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {enabled ? 'border-green-400' : 'border-red-400'}">
-        {#if enabled}
-          <div class="w-2 h-2 rounded-full bg-green-400"></div>
-        {/if}
-      </div>
-      <span class="text-[13px]">{enabled ? 'Enabled' : 'Disabled'}</span>
-    </button>
+    <div class="flex items-center justify-between">
+      <button
+        onclick={() => {
+          if (isNew) {
+            enabled = !enabled
+          } else {
+            onToggleEnabled()
+          }
+        }}
+        class="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
+      >
+        <div class="relative w-9 h-5 rounded-full transition-all {enabled ? 'bg-green-500' : 'bg-gray-600'}">
+          <div class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all {enabled ? 'left-[18px]' : 'left-0.5'}"></div>
+        </div>
+        <span class="text-[12px] {enabled ? 'text-green-400' : 'text-gray-500'}">{enabled ? 'On' : 'Off'}</span>
+      </button>
+      {#if !isNew}
+        <button
+          onclick={onDelete}
+          class="p-1.5 rounded-md bg-transparent border-none cursor-pointer text-gray-500 transition-all hover:bg-red-500/20 hover:text-red-400"
+          title="Delete script"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      {/if}
+    </div>
   </aside>
 
   <main class="flex-1 flex flex-col overflow-hidden bg-black/10">
@@ -151,24 +185,17 @@ function handleKeydown(e: KeyboardEvent) {
       ></textarea>
     </label>
 
-    <div class="flex gap-3 p-4 pt-0 justify-end">
+    <div class="flex gap-3 p-4 pt-0 justify-center">
       <button
         onclick={onCancel}
         class="px-4 py-2 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white"
       >
         Cancel
       </button>
-      {#if !isNew}
-        <button
-          onclick={onDelete}
-          class="px-4 py-2 bg-red-500/20 border-none rounded-md text-red-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-red-500/30"
-        >
-          Delete
-        </button>
-      {/if}
       <button
         onclick={handleSave}
-        class="px-4 py-2 bg-green-400 border-none rounded-md text-black text-[13px] font-semibold cursor-pointer transition-all hover:bg-green-500"
+        disabled={!hasChanges()}
+        class="px-4 py-2 border-none rounded-md text-[13px] font-semibold transition-all {hasChanges() ? 'bg-green-400 text-black cursor-pointer hover:bg-green-500' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}"
       >
         Save
       </button>
