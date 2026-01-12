@@ -1,7 +1,10 @@
 export function extractDomain(url: string): string {
   try {
-    const hostname = new URL(url).hostname
-    return hostname.replace(/^www\./, '')
+    const parsed = new URL(url)
+    if (parsed.protocol === 'chrome:' || parsed.protocol === 'edge:' || parsed.protocol === 'about:') {
+      return `${parsed.protocol}//${parsed.hostname}`
+    }
+    return parsed.hostname.replace(/^www\./, '')
   } catch {
     return ''
   }

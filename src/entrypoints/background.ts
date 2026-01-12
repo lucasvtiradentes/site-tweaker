@@ -226,6 +226,63 @@ export default defineBackground(() => {
     }
   }
 
+  const MENU_PARENT_ID = 'site-tweaker-parent'
+  const menuScriptMap = new Map<
+    string,
+    { type: 'site' | 'source'; siteId?: string; sourceId?: string; scriptId: string }
+  >()
+
+  async function updateContextMenu(tabId: number, url: string) {
+    await chrome.contextMenus.removeAll()
+    menuScriptMap.clear()
+
+    const settings = await getSettings()
+    if (!settings.enabled) return
+
+    const domain = extractDomain(url)
+    if (!domain) return
+
+    let path = '/'
+    try {
+      const urlObj = new URL(url)
+      path = urlObj.pathname + urlObj.search
+    } catch {}
+
+    const site = settings.sites.find((s) => s.domain === domain && s.enabled)
+    const siteScripts = site ? site.scripts.filter((s) => s.enabled && !s.autoRun) : []
+    const sourceScripts = getMatchingSourceScripts(settings.sources, domain, path).filter((s) => !s.autoRun)
+
+    if (siteScripts.length === 0 && sourceScripts.length === 0) return
+
+    chrome.contextMenus.create({
+      id: MENU_PARENT_ID,
+      title: 'Site Tweaker',
+      contexts: ['page'],
+    })
+
+    for (const script of siteScripts) {
+      const menuId = `site-script-${script.id}`
+      menuScriptMap.set(menuId, { type: 'site', siteId: site?.id, scriptId: script.id })
+      chrome.contextMenus.create({
+        id: menuId,
+        parentId: MENU_PARENT_ID,
+        title: `${script.name} (${script.type.toUpperCase()})`,
+        contexts: ['page'],
+      })
+    }
+
+    for (const script of sourceScripts) {
+      const menuId = `source-script-${script.id}`
+      menuScriptMap.set(menuId, { type: 'source', sourceId: script.sourceId, scriptId: script.id })
+      chrome.contextMenus.create({
+        id: menuId,
+        parentId: MENU_PARENT_ID,
+        title: `${script.name} (SRC/${script.type.toUpperCase()})`,
+        contexts: ['page'],
+      })
+    }
+  }
+
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.settings) {
       updateCspRules()
@@ -236,6 +293,9 @@ export default defineBackground(() => {
     if (changeInfo.status === 'complete' && tab.url) {
       updateIconForTab(tabId, tab.url)
       injectAutoRunScripts(tabId, tab.url)
+      if (tab.active) {
+        updateContextMenu(tabId, tab.url)
+      }
     } else if (changeInfo.url) {
       updateIconForTab(tabId, changeInfo.url)
     }
@@ -244,6 +304,9 @@ export default defineBackground(() => {
   chrome.tabs.onActivated.addListener(async (activeInfo) => {
     const tab = await chrome.tabs.get(activeInfo.tabId)
     updateIconForTab(activeInfo.tabId, tab.url)
+    if (tab.url) {
+      updateContextMenu(activeInfo.tabId, tab.url)
+    }
   })
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -297,6 +360,19 @@ export default defineBackground(() => {
         })
       })
       return true
+    }
+  })
+
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (!tab?.id || !info.menuItemId) return
+    const menuId = String(info.menuItemId)
+    const scriptInfo = menuScriptMap.get(menuId)
+    if (!scriptInfo) return
+
+    if (scriptInfo.type === 'site' && scriptInfo.siteId) {
+      await executeManualScript(scriptInfo.siteId, scriptInfo.scriptId, tab.id)
+    } else if (scriptInfo.type === 'source' && scriptInfo.sourceId) {
+      await executeSourceScript(scriptInfo.sourceId, scriptInfo.scriptId, tab.id)
     }
   })
 
