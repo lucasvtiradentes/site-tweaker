@@ -82,17 +82,36 @@ const mergedSites = $derived<MergedSite[]>(() => {
     </div>
   </div>
 
-  <div class="p-2">
-    <button
-      onclick={onSelectSettings}
-      class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all {currentView === 'settings' ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-      <span class="text-[13px] font-medium">Settings</span>
-    </button>
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="p-3 px-4 flex items-center justify-between">
+      <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Sites</span>
+      <button onclick={onAddSite} class="p-1 rounded text-gray-500 hover:text-white hover:bg-white/10 transition-all" title="Add site">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+    </div>
+
+    {#if mergedSites().length === 0}
+      <div class="px-4 py-2">
+        <p class="text-[12px] text-gray-600">No sites configured</p>
+      </div>
+    {:else}
+      <ul class="flex-1 overflow-y-auto px-2">
+        {#each mergedSites() as site (site.domain)}
+          <li>
+            <button
+              onclick={() => site.siteId && onSelectSite(site.siteId)}
+              class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all mb-1 {currentView === 'site' && currentSiteId === site.siteId ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
+            >
+              <img src="https://www.google.com/s2/favicons?domain={site.domain}&sz=32" alt="" class="w-4 h-4 rounded-sm" />
+              <span class="text-[13px] font-medium truncate flex-1 text-left">{site.domain}</span>
+              <span class="text-[9px] px-1.5 rounded bg-blue-500/20 text-blue-400">{site.totalScripts}</span>
+            </button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </div>
 
   <div class="border-t border-white/10 mx-2"></div>
@@ -112,52 +131,16 @@ const mergedSites = $derived<MergedSite[]>(() => {
     </button>
   </div>
 
-  <div class="border-t border-white/10 mx-2"></div>
-
-  <div class="flex-1 flex flex-col overflow-hidden">
-    <div class="p-3 px-4">
-      <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Sites</span>
-    </div>
-
-    {#if mergedSites().length === 0}
-      <div class="px-4 py-2">
-        <p class="text-[12px] text-gray-600">No sites configured</p>
-      </div>
-    {:else}
-      <ul class="flex-1 overflow-y-auto px-2">
-        {#each mergedSites() as site (site.domain)}
-          <li>
-            <button
-              onclick={() => site.siteId && onSelectSite(site.siteId)}
-              class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all mb-1 {currentView === 'site' && currentSiteId === site.siteId ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
-            >
-              <img
-                src="https://www.google.com/s2/favicons?domain={site.domain}&sz=32"
-                alt=""
-                class="w-4 h-4 rounded-sm"
-              />
-              <span class="text-[13px] font-medium truncate flex-1 text-left">{site.domain}</span>
-              {#if site.sourceScripts > 0}
-                <span class="text-[9px] px-1 rounded bg-blue-500/20 text-blue-400">{site.sourceScripts}</span>
-              {/if}
-              <span class="text-[10px] text-gray-600">{site.totalScripts}</span>
-            </button>
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </div>
-
-  <div class="p-2 border-t border-white/10">
+  <div class="p-2 pt-0">
     <button
-      onclick={onAddSite}
-      class="w-full flex items-center justify-center gap-2 p-2.5 rounded-md cursor-pointer transition-all bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white"
+      onclick={onSelectSettings}
+      class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all {currentView === 'settings' ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
-      <span class="text-[13px] font-medium">Add Site</span>
+      <span class="text-[13px] font-medium">Settings</span>
     </button>
   </div>
 </div>
