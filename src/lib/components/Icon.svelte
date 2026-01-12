@@ -12,6 +12,7 @@ type IconName =
   | 'shield'
   | 'x'
   | 'play'
+  | 'code'
 
 interface Props {
   name: IconName
@@ -71,5 +72,8 @@ const { name, size = 16, class: className = '' }: Props = $props()
     <line x1="6" y1="6" x2="18" y2="18" />
   {:else if name === 'play'}
     <polygon points="5,3 19,12 5,21" fill="currentColor" stroke="none" />
+  {:else if name === 'code'}
+    <polyline points="16 18 22 12 16 6" />
+    <polyline points="8 6 2 12 8 18" />
   {/if}
 </svg>

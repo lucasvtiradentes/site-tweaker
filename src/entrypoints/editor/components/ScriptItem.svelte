@@ -25,6 +25,10 @@ const {
   onDelete,
 }: Props = $props()
 
+function handleClick() {
+  onSelect?.()
+}
+
 function handleToggle(e: MouseEvent) {
   e.stopPropagation()
   onToggle()
@@ -36,15 +40,12 @@ function handleDelete(e: MouseEvent) {
 }
 </script>
 
-<li class="group p-2.5 px-3 rounded-lg bg-white/5 transition-all hover:bg-white/10">
+<li
+  class="group p-2.5 px-3 rounded-lg bg-white/5 transition-all hover:bg-white/10 {onSelect ? 'cursor-pointer' : ''}"
+  onclick={onSelect ? handleClick : undefined}
+>
   <div class="flex items-center gap-2">
-    {#if onSelect}
-      <button onclick={onSelect} class="flex-1 min-w-0 bg-transparent border-none cursor-pointer p-0 text-left text-[13px] font-medium text-gray-100 truncate">
-        {name}
-      </button>
-    {:else}
-      <span class="flex-1 min-w-0 text-[13px] font-medium text-gray-100 truncate">{name}</span>
-    {/if}
+    <span class="flex-1 min-w-0 text-[13px] font-medium text-gray-100 truncate">{name}</span>
     {#if canDelete && onDelete}
       <button onclick={handleDelete} class="opacity-0 group-hover:opacity-100 p-1 rounded bg-transparent border-none cursor-pointer text-gray-500 transition-all hover:bg-red-500/20 hover:text-red-400" title="Delete">
         <Icon name="trash" size={14} />

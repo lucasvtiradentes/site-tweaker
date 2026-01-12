@@ -75,8 +75,8 @@ const mergedSites = $derived<MergedSite[]>(() => {
 <div class="flex flex-col h-full">
   <div class="p-4 border-b border-white/10">
     <div class="flex items-center gap-2">
-      <Icon name="shield" size={24} class="text-green-400" />
-      <span class="text-base font-semibold">CSP Scope</span>
+      <Icon name="code" size={24} class="text-green-400" />
+      <span class="text-base font-semibold">Web Customizer</span>
     </div>
   </div>
 
