@@ -128,6 +128,44 @@ function cancelEdit() {
   currentScript = null
   isNewScript = false
 }
+
+async function deleteScriptFromTree(siteId: string, scriptId: string) {
+  if (!settings) return
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return
+  const script = site.scripts.find((s) => s.id === scriptId)
+  if (!script) return
+  if (!confirm(`Delete script "${script.name}"?`)) return
+
+  site.scripts = site.scripts.filter((s) => s.id !== scriptId)
+  await saveSettings(settings)
+
+  if (currentSite?.id === siteId) {
+    currentSite = site
+  }
+  if (currentScript?.id === scriptId) {
+    currentScript = null
+    isNewScript = false
+  }
+}
+
+async function toggleScript(siteId: string, scriptId: string) {
+  if (!settings) return
+  const site = settings.sites.find((s) => s.id === siteId)
+  if (!site) return
+  const script = site.scripts.find((s) => s.id === scriptId)
+  if (!script) return
+
+  script.enabled = !script.enabled
+  await saveSettings(settings)
+
+  if (currentSite?.id === siteId) {
+    currentSite = site
+  }
+  if (currentScript?.id === scriptId) {
+    currentScript = script
+  }
+}
 </script>
 
 <div class="flex h-screen bg-[#0f0f1a] text-gray-100 font-sans text-sm overflow-hidden">
@@ -142,6 +180,8 @@ function cancelEdit() {
         onAddSite={() => showAddSiteModal = true}
         onAddScript={addScript}
         onDeleteSite={deleteSite}
+        onDeleteScript={deleteScriptFromTree}
+        onToggleScript={toggleScript}
       />
     {/if}
   </aside>

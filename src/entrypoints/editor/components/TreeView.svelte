@@ -10,6 +10,8 @@ interface Props {
   onAddSite: () => void
   onAddScript: (siteId: string) => void
   onDeleteSite: (siteId: string) => void
+  onDeleteScript: (siteId: string, scriptId: string) => void
+  onToggleScript: (siteId: string, scriptId: string) => void
 }
 
 const {
@@ -21,6 +23,8 @@ const {
   onAddSite,
   onAddScript,
   onDeleteSite,
+  onDeleteScript,
+  onToggleScript,
 }: Props = $props()
 
 let expandedSites = $state<Set<string>>(new Set())
@@ -55,6 +59,16 @@ function handleAddScript(e: MouseEvent, siteId: string) {
 function handleDeleteSite(e: MouseEvent, siteId: string) {
   e.stopPropagation()
   onDeleteSite(siteId)
+}
+
+function handleDeleteScript(e: MouseEvent, siteId: string, scriptId: string) {
+  e.stopPropagation()
+  onDeleteScript(siteId, scriptId)
+}
+
+function handleToggleScript(e: MouseEvent, siteId: string, scriptId: string) {
+  e.stopPropagation()
+  onToggleScript(siteId, scriptId)
 }
 </script>
 
@@ -131,15 +145,37 @@ function handleDeleteSite(e: MouseEvent, siteId: string) {
                   tabindex="0"
                   onclick={(e) => handleScriptClick(e, site.id, script.id)}
                   onkeydown={(e) => e.key === 'Enter' && onSelectScript(site.id, script.id)}
-                  class="flex items-center gap-2 p-2 pl-4 ml-px rounded-r-md cursor-pointer transition-all {isScriptSelected ? 'bg-green-400/15 text-green-400' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}"
+                  class="group flex items-center gap-2 p-1.5 pl-3 ml-px rounded-r-md cursor-pointer transition-all {isScriptSelected ? 'bg-green-400/15 text-green-400' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}"
                 >
-                  <span class="text-[12px] truncate flex-1">{script.name}</span>
                   <span class="text-[9px] px-1.5 py-0.5 rounded {script.type === 'js' ? 'bg-yellow-400/20 text-yellow-300' : 'bg-purple-500/20 text-purple-400'}">
                     {script.type.toUpperCase()}
                   </span>
-                  {#if !script.enabled}
-                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400">OFF</span>
-                  {/if}
+                  <span class="text-[12px] truncate flex-1">{script.name}</span>
+                  <button
+                    onclick={(e) => handleDeleteScript(e, site.id, script.id)}
+                    class="opacity-0 group-hover:opacity-100 bg-transparent border-none cursor-pointer p-1 rounded text-gray-500 transition-all hover:bg-white/10 hover:text-red-400"
+                    title="Delete script"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                  <button
+                    onclick={(e) => handleToggleScript(e, site.id, script.id)}
+                    class="bg-transparent border-none cursor-pointer p-1 rounded transition-all {script.enabled ? 'text-green-400 hover:bg-white/10' : 'text-gray-600 hover:bg-white/10 hover:text-gray-400'}"
+                    title={script.enabled ? 'Disable script' : 'Enable script'}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3">
+                      {#if script.enabled}
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      {:else}
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      {/if}
+                    </svg>
+                  </button>
                 </li>
               {/each}
               {#if site.scripts.length === 0}
