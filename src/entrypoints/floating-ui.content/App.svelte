@@ -7,6 +7,15 @@ interface Script {
   autoRun: boolean
 }
 
+interface SourceScript {
+  id: string
+  name: string
+  type: 'js' | 'css'
+  autoRun: boolean
+  enabled: boolean
+  sourceId: string
+}
+
 interface Site {
   id: string
   domain: string
@@ -15,8 +24,9 @@ interface Site {
 }
 
 interface SiteData {
-  site: Site
+  site: Site | null
   scripts: Script[]
+  sourceScripts: SourceScript[]
 }
 
 interface Props {
@@ -29,13 +39,26 @@ let isOpen = $state(false)
 let runningScriptId = $state<string | null>(null)
 
 const manualScripts = $derived(siteData.scripts.filter((s) => !s.autoRun && s.enabled))
+const manualSourceScripts = $derived((siteData.sourceScripts || []).filter((s) => !s.autoRun && s.enabled))
+const hasAnyScripts = $derived(manualScripts.length > 0 || manualSourceScripts.length > 0)
 
 async function executeScript(scriptId: string) {
+  if (!siteData.site) return
   runningScriptId = scriptId
   await new Promise<void>((resolve) => {
-    chrome.runtime.sendMessage({ type: 'EXECUTE_SCRIPT', siteId: siteData.site.id, scriptId, tabId: null }, () =>
+    chrome.runtime.sendMessage({ type: 'EXECUTE_SCRIPT', siteId: siteData.site?.id, scriptId, tabId: null }, () =>
       resolve(),
     )
+  })
+  setTimeout(() => {
+    runningScriptId = null
+  }, 300)
+}
+
+async function executeSourceScript(sourceId: string, scriptId: string) {
+  runningScriptId = scriptId
+  await new Promise<void>((resolve) => {
+    chrome.runtime.sendMessage({ type: 'EXECUTE_SOURCE_SCRIPT', sourceId, scriptId, tabId: null }, () => resolve())
   })
   setTimeout(() => {
     runningScriptId = null
@@ -65,7 +88,7 @@ function handleClickOutside(e: MouseEvent) {
       </button>
     </div>
     <ul class="wc-scripts-list">
-      {#if manualScripts.length === 0}
+      {#if !hasAnyScripts}
         <li class="wc-empty">No manual scripts</li>
       {:else}
         {#each manualScripts as script (script.id)}
@@ -79,6 +102,24 @@ function handleClickOutside(e: MouseEvent) {
                 <polygon points="5,3 19,12 5,21"/>
               </svg>
               <span class="wc-script-name">{script.name}</span>
+              <span class="wc-script-type" class:css={script.type === 'css'}>
+                {script.type.toUpperCase()}
+              </span>
+            </button>
+          </li>
+        {/each}
+        {#each manualSourceScripts as script (script.id)}
+          <li class="wc-script-item">
+            <button
+              class="wc-script-btn"
+              class:running={runningScriptId === script.id}
+              onclick={() => executeSourceScript(script.sourceId, script.id)}
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" class="wc-play-icon">
+                <polygon points="5,3 19,12 5,21"/>
+              </svg>
+              <span class="wc-script-name">{script.name}</span>
+              <span class="wc-script-type wc-source">SRC</span>
               <span class="wc-script-type" class:css={script.type === 'css'}>
                 {script.type.toUpperCase()}
               </span>

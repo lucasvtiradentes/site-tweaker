@@ -1,4 +1,5 @@
-import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings } from '../lib/configs'
+import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings, type SourceScript } from '../lib/configs'
+import { matchesDomainPattern, matchesPathPattern } from '../lib/sources'
 
 export default defineBackground(() => {
   let isUpdating = false
@@ -9,7 +10,12 @@ export default defineBackground(() => {
     if (!stored || !Array.isArray(stored.sites)) {
       return DEFAULT_SETTINGS
     }
-    return { ...DEFAULT_SETTINGS, ...stored, sites: stored.sites ?? [] }
+    return {
+      ...DEFAULT_SETTINGS,
+      ...stored,
+      sites: stored.sites ?? [],
+      sources: stored.sources ?? [],
+    }
   }
 
   function getEnabledCspDomains(settings: Settings): string[] {
@@ -138,7 +144,7 @@ export default defineBackground(() => {
     }
   }
 
-  async function injectScript(tabId: number, script: Script): Promise<void> {
+  async function injectScript(tabId: number, script: Script | SourceScript): Promise<void> {
     try {
       if (script.type === 'css') {
         await chrome.scripting.insertCSS({
@@ -161,6 +167,18 @@ export default defineBackground(() => {
     }
   }
 
+  function getMatchingSourceScripts(settings: Settings, domain: string, path: string): SourceScript[] {
+    return settings.sources
+      .filter((s) => s.enabled)
+      .flatMap((s) => s.scripts)
+      .filter(
+        (script) =>
+          script.enabled &&
+          script.domains.some((d) => matchesDomainPattern(domain, d)) &&
+          matchesPathPattern(path, script.paths),
+      )
+  }
+
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
     const settings = await getSettings()
     if (!settings.enabled || !settings.autoInjectEnabled) return
@@ -168,12 +186,21 @@ export default defineBackground(() => {
     const domain = extractDomain(url)
     if (!domain) return
 
-    const site = settings.sites.find((s) => s.domain === domain && s.enabled)
-    if (!site) return
+    const urlObj = new URL(url)
+    const path = urlObj.pathname + urlObj.search
 
-    for (const script of site.scripts) {
-      if (!script.enabled || !script.autoRun) continue
-      if (!matchesUrlPatterns(url, script.urlPatterns)) continue
+    const site = settings.sites.find((s) => s.domain === domain && s.enabled)
+    if (site) {
+      for (const script of site.scripts) {
+        if (!script.enabled || !script.autoRun) continue
+        if (!matchesUrlPatterns(url, script.urlPatterns)) continue
+        await injectScript(tabId, script)
+      }
+    }
+
+    const sourceScripts = getMatchingSourceScripts(settings, domain, path)
+    for (const script of sourceScripts) {
+      if (!script.autoRun) continue
       await injectScript(tabId, script)
     }
   }
@@ -188,6 +215,26 @@ export default defineBackground(() => {
     if (!site) return { success: false, error: 'Site not found' }
 
     const script = site.scripts.find((s) => s.id === scriptId)
+    if (!script) return { success: false, error: 'Script not found' }
+
+    try {
+      await injectScript(tabId, script)
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: String(err) }
+    }
+  }
+
+  async function executeSourceScript(
+    sourceId: string,
+    scriptId: string,
+    tabId: number,
+  ): Promise<{ success: boolean; error?: string }> {
+    const settings = await getSettings()
+    const source = settings.sources.find((s) => s.id === sourceId)
+    if (!source) return { success: false, error: 'Source not found' }
+
+    const script = source.scripts.find((s) => s.id === scriptId)
     if (!script) return { success: false, error: 'Script not found' }
 
     try {
@@ -228,6 +275,15 @@ export default defineBackground(() => {
       executeManualScript(msg.siteId, msg.scriptId, tabId).then(sendResponse)
       return true
     }
+    if (msg.type === 'EXECUTE_SOURCE_SCRIPT') {
+      const tabId = msg.tabId ?? sender.tab?.id
+      if (!tabId) {
+        sendResponse({ success: false, error: 'No tab ID' })
+        return true
+      }
+      executeSourceScript(msg.sourceId, msg.scriptId, tabId).then(sendResponse)
+      return true
+    }
     if (msg.type === 'GET_CURRENT_TAB_INFO') {
       chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
         const tab = tabs[0]
@@ -247,11 +303,17 @@ export default defineBackground(() => {
           return
         }
         const site = settings.sites.find((s) => s.domain === msg.domain && s.enabled)
-        if (!site) {
+        const path = msg.path || '/'
+        const sourceScripts = getMatchingSourceScripts(settings, msg.domain, path)
+        if (!site && sourceScripts.length === 0) {
           sendResponse(null)
           return
         }
-        sendResponse({ site, scripts: site.scripts.filter((s) => s.enabled) })
+        sendResponse({
+          site,
+          scripts: site ? site.scripts.filter((s) => s.enabled) : [],
+          sourceScripts,
+        })
       })
       return true
     }

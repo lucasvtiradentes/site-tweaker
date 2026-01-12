@@ -1,4 +1,15 @@
-import { DEFAULT_SETTINGS, type Script, type Settings, type Site, createScript, createSite } from './configs'
+import {
+  DEFAULT_SETTINGS,
+  type Script,
+  type Settings,
+  type Site,
+  type Source,
+  type SourceScript,
+  createScript,
+  createSite,
+  createSource,
+} from './configs'
+import { refreshSource as fetchAndRefreshSource, getMatchingSourceScripts as matchSourceScripts } from './sources'
 
 export async function getSettings(): Promise<Settings> {
   const result = await chrome.storage.local.get('settings')
@@ -6,7 +17,12 @@ export async function getSettings(): Promise<Settings> {
   if (!stored || !Array.isArray(stored.sites)) {
     return DEFAULT_SETTINGS
   }
-  return { ...DEFAULT_SETTINGS, ...stored, sites: stored.sites ?? [] }
+  return {
+    ...DEFAULT_SETTINGS,
+    ...stored,
+    sites: stored.sites ?? [],
+    sources: stored.sources ?? [],
+  }
 }
 
 export async function saveSettings(settings: Settings): Promise<void> {
@@ -148,4 +164,83 @@ export async function getScriptsForDomain(domain: string): Promise<{ site: Site;
   const site = settings.sites.find((s) => s.domain === normalized && s.enabled)
   if (!site) return null
   return { site, scripts: site.scripts.filter((s) => s.enabled) }
+}
+
+export async function addSource(url: string, token: string | null = null): Promise<Source> {
+  const settings = await getSettings()
+  const existing = settings.sources.find((s) => s.url === url)
+  if (existing) {
+    return existing
+  }
+  const newSource = createSource(url, token)
+  const refreshed = await fetchAndRefreshSource(newSource)
+  settings.sources.push(refreshed)
+  await saveSettings(settings)
+  return refreshed
+}
+
+export async function removeSource(sourceId: string): Promise<void> {
+  const settings = await getSettings()
+  settings.sources = settings.sources.filter((s) => s.id !== sourceId)
+  await saveSettings(settings)
+}
+
+export async function toggleSource(sourceId: string): Promise<boolean> {
+  const settings = await getSettings()
+  const source = settings.sources.find((s) => s.id === sourceId)
+  if (source) {
+    source.enabled = !source.enabled
+    await saveSettings(settings)
+    return source.enabled
+  }
+  return false
+}
+
+export async function refreshSource(sourceId: string): Promise<Source | null> {
+  const settings = await getSettings()
+  const index = settings.sources.findIndex((s) => s.id === sourceId)
+  if (index === -1) return null
+  const refreshed = await fetchAndRefreshSource(settings.sources[index])
+  settings.sources[index] = refreshed
+  await saveSettings(settings)
+  return refreshed
+}
+
+export async function refreshAllSources(): Promise<void> {
+  const settings = await getSettings()
+  for (let i = 0; i < settings.sources.length; i++) {
+    settings.sources[i] = await fetchAndRefreshSource(settings.sources[i])
+  }
+  await saveSettings(settings)
+}
+
+export async function toggleSourceScript(sourceId: string, scriptId: string): Promise<boolean> {
+  const settings = await getSettings()
+  const source = settings.sources.find((s) => s.id === sourceId)
+  if (!source) return false
+  const script = source.scripts.find((s) => s.id === scriptId)
+  if (script) {
+    script.enabled = !script.enabled
+    await saveSettings(settings)
+    return script.enabled
+  }
+  return false
+}
+
+export async function getSourceById(sourceId: string): Promise<Source | undefined> {
+  const settings = await getSettings()
+  return settings.sources.find((s) => s.id === sourceId)
+}
+
+export async function updateSourceToken(sourceId: string, token: string | null): Promise<Source | null> {
+  const settings = await getSettings()
+  const source = settings.sources.find((s) => s.id === sourceId)
+  if (!source) return null
+  source.token = token
+  await saveSettings(settings)
+  return source
+}
+
+export function getMatchingSourceScripts(sources: Source[], domain: string, path: string): SourceScript[] {
+  return matchSourceScripts(sources, domain, path)
 }

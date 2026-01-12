@@ -10,6 +10,15 @@ interface Script {
   autoRun: boolean
 }
 
+interface SourceScript {
+  id: string
+  name: string
+  type: 'js' | 'css'
+  autoRun: boolean
+  enabled: boolean
+  sourceId: string
+}
+
 interface Site {
   id: string
   domain: string
@@ -18,8 +27,9 @@ interface Site {
 }
 
 interface SiteData {
-  site: Site
+  site: Site | null
   scripts: Script[]
+  sourceScripts: SourceScript[]
 }
 
 const CONTAINER_ID = 'wc-floating-ui'
@@ -34,10 +44,19 @@ function extractDomain(url: string): string {
 }
 
 async function getSiteData(): Promise<SiteData | null> {
+  const url = new URL(window.location.href)
+  const path = url.pathname + url.search
   return new Promise((resolve) => {
-    chrome.runtime.sendMessage({ type: 'GET_SITE_DATA', domain: extractDomain(window.location.href) }, (response) => {
-      resolve(response ?? null)
-    })
+    chrome.runtime.sendMessage(
+      {
+        type: 'GET_SITE_DATA',
+        domain: extractDomain(window.location.href),
+        path,
+      },
+      (response) => {
+        resolve(response ?? null)
+      },
+    )
   })
 }
 
@@ -89,7 +108,9 @@ async function init(): Promise<void> {
   }
 
   const manualScripts = siteData.scripts.filter((s) => !s.autoRun && s.enabled)
-  if (manualScripts.length === 0) {
+  const manualSourceScripts = (siteData.sourceScripts || []).filter((s) => !s.autoRun && s.enabled)
+
+  if (manualScripts.length === 0 && manualSourceScripts.length === 0) {
     removeFloatingUI()
     return
   }

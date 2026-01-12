@@ -1,16 +1,27 @@
 <script lang="ts">
-import type { Script } from '../../../lib/configs'
+import type { Script, SourceScript } from '../../../lib/configs'
 
 interface Props {
   script: Script | null
+  sourceScript?: SourceScript | null
   isNew: boolean
+  readonly?: boolean
   onSave: (data: Partial<Script>) => void
   onDelete: () => void
   onCancel: () => void
   onToggleEnabled: () => void
 }
 
-const { script, isNew, onSave, onDelete, onCancel, onToggleEnabled }: Props = $props()
+const {
+  script,
+  sourceScript = null,
+  isNew,
+  readonly = false,
+  onSave,
+  onDelete,
+  onCancel,
+  onToggleEnabled,
+}: Props = $props()
 
 let name = $state('')
 let type = $state<'js' | 'css'>('js')
@@ -18,16 +29,27 @@ let autoRun = $state(false)
 let runAt = $state<'document_start' | 'document_end' | 'document_idle'>('document_idle')
 let enabled = $state(true)
 let urlPatterns = $state('')
+let paths = $state('')
 let code = $state('')
 
 $effect(() => {
-  if (script) {
+  if (sourceScript) {
+    name = sourceScript.name
+    type = sourceScript.type
+    autoRun = sourceScript.autoRun
+    runAt = sourceScript.runAt
+    enabled = sourceScript.enabled
+    paths = sourceScript.paths.join('\n')
+    urlPatterns = ''
+    code = sourceScript.code
+  } else if (script) {
     name = script.name
     type = script.type
     autoRun = script.autoRun
     runAt = script.runAt
     enabled = script.enabled
     urlPatterns = script.urlPatterns.join('\n')
+    paths = ''
     code = script.code
   } else if (isNew) {
     name = ''
@@ -36,6 +58,7 @@ $effect(() => {
     runAt = 'document_idle'
     enabled = true
     urlPatterns = ''
+    paths = ''
     code = ''
   }
 })
@@ -86,13 +109,20 @@ function handleKeydown(e: KeyboardEvent) {
 
 <div class="flex-1 flex overflow-hidden">
   <aside class="w-[220px] p-4 border-r border-white/10 flex flex-col gap-4 overflow-y-auto bg-black/20">
+    {#if readonly}
+      <div class="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 text-[10px] font-medium text-center">
+        SOURCE SCRIPT (READ-ONLY)
+      </div>
+    {/if}
+
     <label class="flex flex-col gap-1.5">
       <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Name</span>
       <input
         type="text"
         bind:value={name}
         placeholder="Script name"
-        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400"
+        disabled={readonly}
+        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
       />
     </label>
 
@@ -100,7 +130,8 @@ function handleKeydown(e: KeyboardEvent) {
       <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Type</span>
       <select
         bind:value={type}
-        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400"
+        disabled={readonly}
+        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <option value="js">JavaScript</option>
         <option value="css">CSS</option>
@@ -111,7 +142,8 @@ function handleKeydown(e: KeyboardEvent) {
       <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Mode</span>
       <select
         bind:value={autoRun}
-        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400"
+        disabled={readonly}
+        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <option value={false}>Manual</option>
         <option value={true}>Auto</option>
@@ -123,7 +155,8 @@ function handleKeydown(e: KeyboardEvent) {
         <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Run At</span>
         <select
           bind:value={runAt}
-          class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400"
+          disabled={readonly}
+          class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <option value="document_idle">Idle</option>
           <option value="document_end">End</option>
@@ -132,45 +165,59 @@ function handleKeydown(e: KeyboardEvent) {
       </label>
     {/if}
 
-    <label class="flex flex-col gap-1.5">
-      <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">URL Patterns</span>
-      <textarea
-        bind:value={urlPatterns}
-        rows="3"
-        placeholder="/path/*&#10;/another/path&#10;(empty = all)"
-        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[12px] resize-y min-h-[70px] focus:outline-none focus:border-green-400"
-      ></textarea>
-    </label>
+    {#if readonly && paths}
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Paths</span>
+        <textarea
+          bind:value={paths}
+          rows="3"
+          disabled
+          class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[12px] resize-y min-h-[70px] focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+        ></textarea>
+      </label>
+    {:else if !readonly}
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">URL Patterns</span>
+        <textarea
+          bind:value={urlPatterns}
+          rows="3"
+          placeholder="/path/*&#10;/another/path&#10;(empty = all)"
+          class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[12px] resize-y min-h-[70px] focus:outline-none focus:border-green-400"
+        ></textarea>
+      </label>
+    {/if}
 
-    <div class="flex items-center justify-between">
-      <button
-        onclick={() => {
-          if (isNew) {
-            enabled = !enabled
-          } else {
-            onToggleEnabled()
-          }
-        }}
-        class="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
-      >
-        <div class="relative w-9 h-5 rounded-full transition-all {enabled ? 'bg-green-500' : 'bg-gray-600'}">
-          <div class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all {enabled ? 'left-[18px]' : 'left-0.5'}"></div>
-        </div>
-        <span class="text-[12px] {enabled ? 'text-green-400' : 'text-gray-500'}">{enabled ? 'On' : 'Off'}</span>
-      </button>
-      {#if !isNew}
+    {#if !readonly}
+      <div class="flex items-center justify-between">
         <button
-          onclick={onDelete}
-          class="p-1.5 rounded-md bg-transparent border-none cursor-pointer text-gray-500 transition-all hover:bg-red-500/20 hover:text-red-400"
-          title="Delete script"
+          onclick={() => {
+            if (isNew) {
+              enabled = !enabled
+            } else {
+              onToggleEnabled()
+            }
+          }}
+          class="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
+          <div class="relative w-9 h-5 rounded-full transition-all {enabled ? 'bg-green-500' : 'bg-gray-600'}">
+            <div class="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all {enabled ? 'left-[18px]' : 'left-0.5'}"></div>
+          </div>
+          <span class="text-[12px] {enabled ? 'text-green-400' : 'text-gray-500'}">{enabled ? 'On' : 'Off'}</span>
         </button>
-      {/if}
-    </div>
+        {#if !isNew}
+          <button
+            onclick={onDelete}
+            class="p-1.5 rounded-md bg-transparent border-none cursor-pointer text-gray-500 transition-all hover:bg-red-500/20 hover:text-red-400"
+            title="Delete script"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        {/if}
+      </div>
+    {/if}
   </aside>
 
   <main class="flex-1 flex flex-col overflow-hidden bg-black/10">
@@ -181,24 +228,36 @@ function handleKeydown(e: KeyboardEvent) {
         onkeydown={handleKeydown}
         placeholder="// Your code here..."
         spellcheck="false"
-        class="flex-1 px-4 py-3 border border-white/10 rounded-md bg-white/5 text-white text-[13px] font-mono leading-relaxed resize-none focus:outline-none focus:border-green-400"
+        readonly={readonly}
+        class="flex-1 px-4 py-3 border border-white/10 rounded-md bg-white/5 text-white text-[13px] font-mono leading-relaxed resize-none focus:outline-none focus:border-green-400 read-only:opacity-80"
       ></textarea>
     </label>
 
-    <div class="flex gap-3 p-4 pt-0 justify-center">
-      <button
-        onclick={onCancel}
-        class="px-4 py-2 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white"
-      >
-        Cancel
-      </button>
-      <button
-        onclick={handleSave}
-        disabled={!hasChanges()}
-        class="px-4 py-2 border-none rounded-md text-[13px] font-semibold transition-all {hasChanges() ? 'bg-green-400 text-black cursor-pointer hover:bg-green-500' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}"
-      >
-        Save
-      </button>
-    </div>
+    {#if !readonly}
+      <div class="flex gap-3 p-4 pt-0 justify-center">
+        <button
+          onclick={onCancel}
+          class="px-4 py-2 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white"
+        >
+          Cancel
+        </button>
+        <button
+          onclick={handleSave}
+          disabled={!hasChanges()}
+          class="px-4 py-2 border-none rounded-md text-[13px] font-semibold transition-all {hasChanges() ? 'bg-green-400 text-black cursor-pointer hover:bg-green-500' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}"
+        >
+          Save
+        </button>
+      </div>
+    {:else}
+      <div class="flex gap-3 p-4 pt-0 justify-center">
+        <button
+          onclick={onCancel}
+          class="px-4 py-2 bg-white/10 border-none rounded-md text-gray-400 text-[13px] font-medium cursor-pointer transition-all hover:bg-white/15 hover:text-white"
+        >
+          Back
+        </button>
+      </div>
+    {/if}
   </main>
 </div>

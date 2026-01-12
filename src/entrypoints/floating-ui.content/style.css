@@ -159,6 +159,11 @@
   color: #a78bfa;
 }
 
+.wc-script-type.wc-source {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
 .wc-empty {
   padding: 20px;
   text-align: center;

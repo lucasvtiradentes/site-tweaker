@@ -9,6 +9,32 @@ export interface Script {
   urlPatterns: string[]
 }
 
+export interface SourceScript {
+  id: string
+  name: string
+  type: 'js' | 'css'
+  code: string
+  autoRun: boolean
+  runAt: 'document_start' | 'document_end' | 'document_idle'
+  domains: string[]
+  paths: string[]
+  enabled: boolean
+  sourceId: string
+}
+
+export interface Source {
+  id: string
+  url: string
+  token: string | null
+  name: string
+  description: string
+  enabled: boolean
+  lastFetched: number | null
+  lastError: string | null
+  version: string
+  scripts: SourceScript[]
+}
+
 export interface Site {
   id: string
   domain: string
@@ -34,6 +60,7 @@ export interface Settings {
   autoInjectEnabled: boolean
   headers: Headers
   sites: Site[]
+  sources: Source[]
 }
 
 export const DEFAULT_HEADERS: Headers = {
@@ -53,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
   autoInjectEnabled: true,
   headers: DEFAULT_HEADERS,
   sites: [],
+  sources: [],
 }
 
 export type HeaderKey = keyof Headers
@@ -81,6 +109,21 @@ export function createSite(domain: string): Site {
     domain,
     enabled: true,
     cspEnabled: false,
+    scripts: [],
+  }
+}
+
+export function createSource(url: string, token: string | null = null): Source {
+  return {
+    id: generateId(),
+    url,
+    token,
+    name: '',
+    description: '',
+    enabled: true,
+    lastFetched: null,
+    lastError: null,
+    version: '',
     scripts: [],
   }
 }
