@@ -53,11 +53,11 @@ function handleClickOutside(e: MouseEvent) {
 
 <svelte:document onclick={handleClickOutside} />
 
-<div class="wc-container" onclick={(e) => e.stopPropagation()}>
+<div class="wc-container" role="presentation" onclick={(e) => e.stopPropagation()} onkeydown={(e) => e.stopPropagation()}>
   <div class="wc-panel" class:open={isOpen}>
     <div class="wc-panel-header">
       <span class="wc-panel-title">Scripts</span>
-      <button class="wc-close-btn" onclick={() => isOpen = false}>
+      <button class="wc-close-btn" onclick={() => isOpen = false} aria-label="Close panel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -89,7 +89,7 @@ function handleClickOutside(e: MouseEvent) {
     </ul>
   </div>
 
-  <button class="wc-trigger" onclick={() => isOpen = !isOpen}>
+  <button class="wc-trigger" onclick={() => isOpen = !isOpen} aria-label="Toggle scripts panel">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.25C16.6 22.15 20 17.25 20 12V6l-8-4z"/>
       <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>

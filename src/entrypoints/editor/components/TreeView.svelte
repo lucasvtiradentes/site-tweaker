@@ -140,17 +140,16 @@ function handleToggleScript(e: MouseEvent, siteId: string, scriptId: string) {
             <ul class="list-none ml-4 mt-1 border-l border-white/10">
               {#each site.scripts as script (script.id)}
                 {@const isScriptSelected = currentScriptId === script.id}
-                <li
-                  role="button"
-                  tabindex="0"
-                  onclick={(e) => handleScriptClick(e, site.id, script.id)}
-                  onkeydown={(e) => e.key === 'Enter' && onSelectScript(site.id, script.id)}
-                  class="group flex items-center gap-2 p-1.5 pl-3 ml-px rounded-r-md cursor-pointer transition-all {isScriptSelected ? 'bg-green-400/15 text-green-400' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}"
-                >
-                  <span class="text-[9px] px-1.5 py-0.5 rounded {script.type === 'js' ? 'bg-yellow-400/20 text-yellow-300' : 'bg-purple-500/20 text-purple-400'}">
-                    {script.type.toUpperCase()}
-                  </span>
-                  <span class="text-[12px] truncate flex-1">{script.name}</span>
+                <li class="group flex items-center gap-2 p-1.5 pl-3 ml-px rounded-r-md transition-all {isScriptSelected ? 'bg-green-400/15 text-green-400' : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'}">
+                  <button
+                    onclick={(e) => handleScriptClick(e, site.id, script.id)}
+                    class="flex items-center gap-2 flex-1 min-w-0 bg-transparent border-none cursor-pointer p-0 text-inherit"
+                  >
+                    <span class="text-[9px] px-1.5 py-0.5 rounded {script.type === 'js' ? 'bg-yellow-400/20 text-yellow-300' : 'bg-purple-500/20 text-purple-400'}">
+                      {script.type.toUpperCase()}
+                    </span>
+                    <span class="text-[12px] truncate flex-1 text-left">{script.name}</span>
+                  </button>
                   <button
                     onclick={(e) => handleDeleteScript(e, site.id, script.id)}
                     class="opacity-0 group-hover:opacity-100 bg-transparent border-none cursor-pointer p-1 rounded text-gray-500 transition-all hover:bg-white/10 hover:text-red-400"
