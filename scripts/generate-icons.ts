@@ -2,8 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const iconsDir = path.join(__dirname, '../public/icons')
+const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
+const iconsDir = path.join(rootDir, 'public/icons')
 
 const sizes = [16, 32, 48, 128]
 
