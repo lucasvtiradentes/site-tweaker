@@ -141,6 +141,20 @@ async function handleAddSite(domain: string) {
   selectSite(newSite.id)
 }
 
+async function handleSelectDomain(domain: string) {
+  if (!settings) return
+  const existing = settings.sites.find((s) => s.domain === domain)
+  if (existing) {
+    selectSite(existing.id)
+    return
+  }
+
+  const newSite = createSite(domain)
+  settings.sites.push(newSite)
+  await saveSettings(settings)
+  selectSite(newSite.id)
+}
+
 async function deleteSite() {
   if (!settings || !currentSiteId) return
   const site = settings.sites.find((s) => s.id === currentSiteId)
@@ -298,6 +312,7 @@ async function handleUpdateSourceToken(token: string | null) {
         {currentSiteId}
         onSelectSettings={selectSettings}
         onSelectSite={selectSite}
+        onSelectDomain={handleSelectDomain}
         onSelectSources={selectSources}
         onAddSite={() => showAddSiteModal = true}
       />

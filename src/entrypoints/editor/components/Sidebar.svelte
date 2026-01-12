@@ -10,6 +10,7 @@ interface Props {
   currentSiteId: string | null
   onSelectSettings: () => void
   onSelectSite: (siteId: string) => void
+  onSelectDomain: (domain: string) => void
   onSelectSources: () => void
   onAddSite: () => void
 }
@@ -21,6 +22,7 @@ const {
   currentSiteId,
   onSelectSettings,
   onSelectSite,
+  onSelectDomain,
   onSelectSources,
   onAddSite,
 }: Props = $props()
@@ -98,7 +100,7 @@ const mergedSites = $derived<MergedSite[]>(() => {
         {#each mergedSites() as site (site.domain)}
           <li>
             <button
-              onclick={() => site.siteId && onSelectSite(site.siteId)}
+              onclick={() => site.siteId ? onSelectSite(site.siteId) : onSelectDomain(site.domain)}
               class="w-full flex items-center gap-2 p-2.5 px-3 rounded-md cursor-pointer transition-all mb-1 {currentView === 'site' && currentSiteId === site.siteId ? 'bg-green-400/15 text-green-400' : 'text-gray-400 hover:bg-white/5'}"
             >
               <img src="https://www.google.com/s2/favicons?domain={site.domain}&sz=32" alt="" class="w-4 h-4 rounded-sm" />
