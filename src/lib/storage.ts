@@ -21,6 +21,20 @@ export async function toggleGlobal(): Promise<boolean> {
   return settings.enabled
 }
 
+export async function toggleFloatingUi(): Promise<boolean> {
+  const settings = await getSettings()
+  settings.floatingUiEnabled = !settings.floatingUiEnabled
+  await saveSettings(settings)
+  return settings.floatingUiEnabled
+}
+
+export async function toggleAutoInject(): Promise<boolean> {
+  const settings = await getSettings()
+  settings.autoInjectEnabled = !settings.autoInjectEnabled
+  await saveSettings(settings)
+  return settings.autoInjectEnabled
+}
+
 export function normalizeDomain(input: string): string {
   let domain = input.trim().toLowerCase()
   domain = domain.replace(/^https?:\/\//, '')

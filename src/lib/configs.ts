@@ -30,6 +30,8 @@ export interface Headers {
 
 export interface Settings {
   enabled: boolean
+  floatingUiEnabled: boolean
+  autoInjectEnabled: boolean
   headers: Headers
   sites: Site[]
 }
@@ -46,7 +48,9 @@ export const DEFAULT_HEADERS: Headers = {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
-  enabled: false,
+  enabled: true,
+  floatingUiEnabled: true,
+  autoInjectEnabled: true,
   headers: DEFAULT_HEADERS,
   sites: [],
 }

@@ -163,7 +163,7 @@ export default defineBackground(() => {
 
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
     const settings = await getSettings()
-    if (!settings.enabled) return
+    if (!settings.enabled || !settings.autoInjectEnabled) return
 
     const domain = extractDomain(url)
     if (!domain) return
@@ -242,7 +242,7 @@ export default defineBackground(() => {
     }
     if (msg.type === 'GET_SITE_DATA') {
       getSettings().then((settings) => {
-        if (!settings.enabled) {
+        if (!settings.enabled || !settings.floatingUiEnabled) {
           sendResponse(null)
           return
         }
