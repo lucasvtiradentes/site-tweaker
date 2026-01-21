@@ -4,7 +4,7 @@ import { getMatchingSourceScripts, matchesDomainPattern, matchesPathPattern } fr
 import { extractDomain } from '../lib/utils'
 
 export default defineBackground(() => {
-  let isUpdating = false
+  let cspRulesPromise: Promise<void> | null = null
 
   async function getSettings(): Promise<Settings> {
     const result = await chrome.storage.local.get('settings')
@@ -69,11 +69,10 @@ export default defineBackground(() => {
     }
   }
 
-  async function updateCspRules(): Promise<void> {
-    if (isUpdating) return
-    isUpdating = true
+  function updateCspRules(): Promise<void> {
+    if (cspRulesPromise) return cspRulesPromise
 
-    try {
+    cspRulesPromise = (async () => {
       const settings = await getSettings()
       const domains = getEnabledCspDomains(settings)
       const headers = getEnabledHeaders(settings)
@@ -87,8 +86,7 @@ export default defineBackground(() => {
         return
       }
 
-      const initiatorDomains = domains.flatMap((d) => [d, `www.${d}`])
-      const requestDomains = domains.flatMap((d) => [d, `*.${d}`])
+      const requestDomains = domains.flatMap((d) => [d, `www.${d}`])
 
       const rule: chrome.declarativeNetRequest.Rule = {
         id: 1,
@@ -101,7 +99,6 @@ export default defineBackground(() => {
           })),
         },
         condition: {
-          initiatorDomains,
           requestDomains,
           resourceTypes: [
             chrome.declarativeNetRequest.ResourceType.MAIN_FRAME,
@@ -115,9 +112,14 @@ export default defineBackground(() => {
       })
 
       await updateAllTabsIcons()
-    } finally {
-      isUpdating = false
-    }
+    })()
+
+    return cspRulesPromise
+  }
+
+  function refreshCspRules(): void {
+    cspRulesPromise = null
+    updateCspRules()
   }
 
   function matchesUrlPatterns(url: string, patterns: string[]): boolean {
@@ -161,6 +163,8 @@ export default defineBackground(() => {
   }
 
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
+    if (cspRulesPromise) await cspRulesPromise
+
     const settings = await getSettings()
     if (!settings.enabled || !settings.autoInjectEnabled) return
 
@@ -191,6 +195,8 @@ export default defineBackground(() => {
     scriptId: string,
     tabId: number,
   ): Promise<{ success: boolean; error?: string }> {
+    if (cspRulesPromise) await cspRulesPromise
+
     const settings = await getSettings()
     const site = settings.sites.find((s) => s.id === siteId)
     if (!site) return { success: false, error: 'Site not found' }
@@ -211,6 +217,8 @@ export default defineBackground(() => {
     scriptId: string,
     tabId: number,
   ): Promise<{ success: boolean; error?: string }> {
+    if (cspRulesPromise) await cspRulesPromise
+
     const settings = await getSettings()
     const source = settings.sources.find((s) => s.id === sourceId)
     if (!source) return { success: false, error: 'Source not found' }
@@ -285,7 +293,7 @@ export default defineBackground(() => {
 
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.settings) {
-      updateCspRules()
+      refreshCspRules()
     }
   })
 
