@@ -1,8 +1,8 @@
 <script lang="ts">
-import { EmptyState, Icon } from '../../../lib/components'
 import type { Source } from '../../../lib/configs'
 import { getDisplayUrl } from '../../../lib/sources'
 import { formatRelativeTime } from '../../../lib/utils'
+import { EmptyState, Icon } from './'
 
 interface Props {
   sources: Source[]

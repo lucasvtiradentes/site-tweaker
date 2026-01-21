@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Icon } from '../../../lib/components'
+import { Icon } from './'
 
 interface Props {
   name: string

@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Icon } from '../../../lib/components'
 import type { Site, Source } from '../../../lib/configs'
 import { APP_NAME } from '../../../lib/constants'
+import { Icon } from './'
 
 interface Props {
   sites: Site[]

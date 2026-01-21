@@ -1,6 +1,6 @@
 <script lang="ts">
-import { Icon, Toggle } from '../../../lib/components'
 import type { Script, SourceScript } from '../../../lib/configs'
+import { Icon, Toggle } from './'
 
 interface Props {
   script: Script | null

@@ -1,7 +1,7 @@
 <script lang="ts">
-import { Icon, Modal } from '../../../lib/components'
 import { CONFIG_FILE } from '../../../lib/constants'
 import { parseGitHubUrl } from '../../../lib/sources'
+import { Icon, Modal } from './'
 
 interface Props {
   onConfirm: (url: string, token: string | null) => void

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Modal } from '../../../lib/components'
+import { Modal } from './'
 
 interface Props {
   onConfirm: (domain: string) => void

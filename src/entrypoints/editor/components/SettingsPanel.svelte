@@ -1,7 +1,7 @@
 <script lang="ts">
-import { SettingRow, Toggle } from '../../../lib/components'
 import type { HeaderKey, Settings } from '../../../lib/configs'
 import { saveSettings } from '../../../lib/storage'
+import { SettingRow, Toggle } from './'
 
 interface Props {
   settings: Settings

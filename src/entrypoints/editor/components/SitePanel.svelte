@@ -1,6 +1,6 @@
 <script lang="ts">
-import { Icon, Toggle } from '../../../lib/components'
 import type { Site, SourceScript } from '../../../lib/configs'
+import { Icon, Toggle } from './'
 import ScriptList from './ScriptList.svelte'
 
 interface Props {

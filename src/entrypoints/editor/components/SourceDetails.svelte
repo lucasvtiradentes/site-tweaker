@@ -1,9 +1,9 @@
 <script lang="ts">
-import { EmptyState, Icon } from '../../../lib/components'
 import type { Source, SourceScript } from '../../../lib/configs'
 import { CONFIG_FILE } from '../../../lib/constants'
 import { getDisplayUrl } from '../../../lib/sources'
 import { formatDate } from '../../../lib/utils'
+import { EmptyState, Icon } from './'
 import ScriptList from './ScriptList.svelte'
 
 interface Props {

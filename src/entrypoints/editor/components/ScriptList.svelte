@@ -1,6 +1,6 @@
 <script lang="ts">
-import { EmptyState } from '../../../lib/components'
 import type { Script, SourceScript } from '../../../lib/configs'
+import { EmptyState } from './'
 import ScriptItem from './ScriptItem.svelte'
 
 interface Props {
