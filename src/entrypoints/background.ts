@@ -3,8 +3,11 @@ import { MSG } from '../lib/messages'
 import { getMatchingSourceScripts, matchesDomainPattern, matchesPathPattern } from '../lib/sources'
 import { extractDomain } from '../lib/utils'
 
+const LOG = '[site-tweaker]'
+
 export default defineBackground(() => {
   let cspRulesPromise: Promise<void> | null = null
+  const lastInjectedUrl = new Map<number, string>()
 
   async function getSettings(): Promise<Settings> {
     const result = await chrome.storage.local.get('settings')
@@ -163,6 +166,12 @@ export default defineBackground(() => {
   }
 
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
+    if (lastInjectedUrl.get(tabId) === url) {
+      console.log(LOG, 'skipping duplicate injection for', url)
+      return
+    }
+    lastInjectedUrl.set(tabId, url)
+
     if (cspRulesPromise) await cspRulesPromise
 
     const settings = await getSettings()
@@ -184,8 +193,13 @@ export default defineBackground(() => {
     }
 
     const sourceScripts = getMatchingSourceScripts(settings.sources, domain, path)
-    for (const script of sourceScripts) {
-      if (!script.autoRun) continue
+    const autoRunSourceScripts = sourceScripts.filter((s) => s.autoRun)
+    console.log(
+      LOG,
+      `matched ${sourceScripts.length} source scripts (${autoRunSourceScripts.length} auto-run) for path "${path}"`,
+    )
+    for (const script of autoRunSourceScripts) {
+      console.log(LOG, `injecting auto-run script: "${script.name}"`)
       await injectScript(tabId, script)
     }
   }
@@ -239,56 +253,63 @@ export default defineBackground(() => {
     string,
     { type: 'site' | 'source'; siteId?: string; sourceId?: string; scriptId: string }
   >()
+  let menuUpdatePromise: Promise<void> | null = null
 
-  async function updateContextMenu(tabId: number, url: string) {
-    await chrome.contextMenus.removeAll()
-    menuScriptMap.clear()
+  async function updateContextMenu(_tabId: number, url: string) {
+    if (menuUpdatePromise) await menuUpdatePromise
 
-    const settings = await getSettings()
-    if (!settings.enabled) return
+    menuUpdatePromise = (async () => {
+      await chrome.contextMenus.removeAll()
+      menuScriptMap.clear()
 
-    const domain = extractDomain(url)
-    if (!domain) return
+      const settings = await getSettings()
+      if (!settings.enabled) return
 
-    let path = '/'
-    try {
-      const urlObj = new URL(url)
-      path = urlObj.pathname + urlObj.search
-    } catch {}
+      const domain = extractDomain(url)
+      if (!domain) return
 
-    const site = settings.sites.find((s) => s.domain === domain && s.enabled)
-    const siteScripts = site ? site.scripts.filter((s) => s.enabled && !s.autoRun) : []
-    const sourceScripts = getMatchingSourceScripts(settings.sources, domain, path).filter((s) => !s.autoRun)
+      let path = '/'
+      try {
+        const urlObj = new URL(url)
+        path = urlObj.pathname + urlObj.search
+      } catch {}
 
-    if (siteScripts.length === 0 && sourceScripts.length === 0) return
+      const site = settings.sites.find((s) => s.domain === domain && s.enabled)
+      const siteScripts = site ? site.scripts.filter((s) => s.enabled && !s.autoRun) : []
+      const sourceScripts = getMatchingSourceScripts(settings.sources, domain, path).filter((s) => !s.autoRun)
 
-    chrome.contextMenus.create({
-      id: MENU_PARENT_ID,
-      title: 'Site Tweaker',
-      contexts: ['page'],
-    })
+      if (siteScripts.length === 0 && sourceScripts.length === 0) return
 
-    for (const script of siteScripts) {
-      const menuId = `site-script-${script.id}`
-      menuScriptMap.set(menuId, { type: 'site', siteId: site?.id, scriptId: script.id })
       chrome.contextMenus.create({
-        id: menuId,
-        parentId: MENU_PARENT_ID,
-        title: `${script.name} (${script.type.toUpperCase()})`,
+        id: MENU_PARENT_ID,
+        title: 'Site Tweaker',
         contexts: ['page'],
       })
-    }
 
-    for (const script of sourceScripts) {
-      const menuId = `source-script-${script.id}`
-      menuScriptMap.set(menuId, { type: 'source', sourceId: script.sourceId, scriptId: script.id })
-      chrome.contextMenus.create({
-        id: menuId,
-        parentId: MENU_PARENT_ID,
-        title: `${script.name} (SRC/${script.type.toUpperCase()})`,
-        contexts: ['page'],
-      })
-    }
+      for (const script of siteScripts) {
+        const menuId = `site-script-${script.id}`
+        menuScriptMap.set(menuId, { type: 'site', siteId: site?.id, scriptId: script.id })
+        chrome.contextMenus.create({
+          id: menuId,
+          parentId: MENU_PARENT_ID,
+          title: `${script.name} (${script.type.toUpperCase()})`,
+          contexts: ['page'],
+        })
+      }
+
+      for (const script of sourceScripts) {
+        const menuId = `source-script-${script.id}`
+        menuScriptMap.set(menuId, { type: 'source', sourceId: script.sourceId, scriptId: script.id })
+        chrome.contextMenus.create({
+          id: menuId,
+          parentId: MENU_PARENT_ID,
+          title: `${script.name} (SRC/${script.type.toUpperCase()})`,
+          contexts: ['page'],
+        })
+      }
+    })()
+
+    return menuUpdatePromise
   }
 
   chrome.storage.onChanged.addListener((changes) => {
@@ -299,6 +320,7 @@ export default defineBackground(() => {
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete' && tab.url) {
+      console.log(LOG, 'page loaded (full)', tab.url)
       updateIconForTab(tabId, tab.url)
       injectAutoRunScripts(tabId, tab.url)
       if (tab.active) {
@@ -309,12 +331,25 @@ export default defineBackground(() => {
     }
   })
 
+  chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+    if (details.frameId !== 0) return
+    console.log(LOG, 'page changed (SPA)', details.url)
+    updateIconForTab(details.tabId, details.url)
+    injectAutoRunScripts(details.tabId, details.url)
+    updateContextMenu(details.tabId, details.url)
+    chrome.tabs.sendMessage(details.tabId, { type: MSG.URL_CHANGED, url: details.url }).catch(() => {})
+  })
+
   chrome.tabs.onActivated.addListener(async (activeInfo) => {
     const tab = await chrome.tabs.get(activeInfo.tabId)
     updateIconForTab(activeInfo.tabId, tab.url)
     if (tab.url) {
       updateContextMenu(activeInfo.tabId, tab.url)
     }
+  })
+
+  chrome.tabs.onRemoved.addListener((tabId) => {
+    lastInjectedUrl.delete(tabId)
   })
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {

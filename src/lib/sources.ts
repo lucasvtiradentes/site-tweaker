@@ -197,7 +197,8 @@ export function matchesPathPattern(path: string, patterns: string[]): boolean {
       return new RegExp(pattern).test(path)
     }
     if (pattern.includes('*')) {
-      const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`)
+      const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*')
+      const regex = new RegExp(`^${escaped}$`)
       return regex.test(path)
     }
     return path.startsWith(pattern)

@@ -101,5 +101,12 @@ export default defineContentScript({
     chrome.storage.onChanged.addListener(() => {
       init()
     })
+
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg.type === MSG.URL_CHANGED) {
+        console.log('[site-tweaker] floating-ui: URL changed (SPA)', msg.url)
+        init()
+      }
+    })
   },
 })

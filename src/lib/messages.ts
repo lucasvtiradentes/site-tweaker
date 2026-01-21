@@ -3,6 +3,7 @@ export const MSG = {
   EXECUTE_SOURCE_SCRIPT: 'EXECUTE_SOURCE_SCRIPT',
   GET_SITE_DATA: 'GET_SITE_DATA',
   GET_CURRENT_TAB_INFO: 'GET_CURRENT_TAB_INFO',
+  URL_CHANGED: 'URL_CHANGED',
 } as const
 
 export type MessageType = (typeof MSG)[keyof typeof MSG]

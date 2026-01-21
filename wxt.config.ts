@@ -13,7 +13,7 @@ export default defineConfig({
   manifest: {
     name: APP_NAME,
     description: 'Customize websites with scripts, styles, and CSP management',
-    permissions: ['storage', 'tabs', 'scripting', 'declarativeNetRequest', 'contextMenus'],
+    permissions: ['storage', 'tabs', 'scripting', 'declarativeNetRequest', 'contextMenus', 'webNavigation'],
     host_permissions: ['<all_urls>'],
     icons: {
       16: 'icons/icon-16.png',
