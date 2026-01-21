@@ -150,24 +150,33 @@ export default defineBackground(() => {
           css: script.code,
         })
       } else {
-        await chrome.scripting.executeScript({
+        const results = await chrome.scripting.executeScript({
           target: { tabId },
-          func: (code: string) => {
-            const fn = new Function(code)
-            fn()
+          func: (code: string, scriptName: string) => {
+            try {
+              const fn = new Function(code)
+              fn()
+              return { success: true }
+            } catch (err) {
+              console.error(`[site-tweaker] script "${scriptName}" error:`, err)
+              return { success: false, error: String(err) }
+            }
           },
-          args: [script.code],
+          args: [script.code, script.name],
           world: 'MAIN',
         })
+        const result = results[0]?.result as { success: boolean; error?: string } | undefined
+        if (result && !result.success) {
+          console.error(LOG, `script "${script.name}" failed:`, result.error)
+        }
       }
     } catch (err) {
-      console.error(`Failed to inject script ${script.name}:`, err)
+      console.error(LOG, `Failed to inject script "${script.name}":`, err)
     }
   }
 
   async function injectAutoRunScripts(tabId: number, url: string): Promise<void> {
     if (lastInjectedUrl.get(tabId) === url) {
-      console.log(LOG, 'skipping duplicate injection for', url)
       return
     }
     lastInjectedUrl.set(tabId, url)
@@ -318,9 +327,17 @@ export default defineBackground(() => {
     }
   })
 
+  chrome.webNavigation.onCommitted.addListener((details) => {
+    if (details.frameId !== 0) return
+    if (details.transitionType === 'auto_subframe') return
+    const lastUrl = lastInjectedUrl.get(details.tabId)
+    if (lastUrl && lastUrl !== details.url) {
+      lastInjectedUrl.delete(details.tabId)
+    }
+  })
+
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete' && tab.url) {
-      console.log(LOG, 'page loaded (full)', tab.url)
       updateIconForTab(tabId, tab.url)
       injectAutoRunScripts(tabId, tab.url)
       if (tab.active) {
@@ -333,7 +350,6 @@ export default defineBackground(() => {
 
   chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
     if (details.frameId !== 0) return
-    console.log(LOG, 'page changed (SPA)', details.url)
     updateIconForTab(details.tabId, details.url)
     injectAutoRunScripts(details.tabId, details.url)
     updateContextMenu(details.tabId, details.url)
