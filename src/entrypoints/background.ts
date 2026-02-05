@@ -25,7 +25,13 @@ export default defineBackground(() => {
 
   function getEnabledCspDomains(settings: Settings): string[] {
     if (!settings.enabled) return []
-    return settings.sites.filter((s) => s.enabled && s.cspEnabled).map((s) => s.domain)
+    const siteDomains = settings.sites.filter((s) => s.enabled && s.cspEnabled).map((s) => s.domain)
+    const sourceDomains = settings.sources
+      .filter((s) => s.enabled)
+      .flatMap((s) => s.scripts)
+      .filter((s) => s.enabled)
+      .flatMap((s) => s.domains)
+    return [...new Set([...siteDomains, ...sourceDomains])]
   }
 
   function getEnabledHeaders(settings: Settings): HeaderKey[] {
@@ -154,8 +160,20 @@ export default defineBackground(() => {
           target: { tabId },
           func: (code: string, scriptName: string) => {
             try {
-              const fn = new Function(code)
-              fn()
+              const blob = new Blob([code], { type: 'application/javascript' })
+              const url = URL.createObjectURL(blob)
+              const el = document.createElement('script')
+              el.src = url
+              el.onload = () => {
+                el.remove()
+                URL.revokeObjectURL(url)
+              }
+              el.onerror = () => {
+                console.error(`[site-tweaker] script "${scriptName}" failed to load via blob`)
+                el.remove()
+                URL.revokeObjectURL(url)
+              }
+              document.documentElement.appendChild(el)
               return { success: true }
             } catch (err) {
               console.error(`[site-tweaker] script "${scriptName}" error:`, err)
