@@ -114,6 +114,8 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
 | lint-staged              | ^15.2.11   | Run linters on staged git |
 | rimraf                   | ^6.1.2     | Cross-platform rm -rf     |
 | tsx                      | ^4.21.0    | TypeScript script runner  |
+| @types/chrome            | ^0.0.287   | Chrome API types          |
+| @types/node              | ^25.0.6    | Node.js types             |
 
 ## File Structure
 
