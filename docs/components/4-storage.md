@@ -84,12 +84,12 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 
 ### Scripts
 
-| Function         | Signature                                                      | Purpose       |
-|------------------|----------------------------------------------------------------|---------------|
-| `addScript()`    | `(siteId, script?: Partial<Script>) -> Promise<Script or null>`| Add to site   |
-| `updateScript()` | `(siteId, scriptId, updates) -> Promise<Script or null>`       | Update script |
-| `removeScript()` | `(siteId, scriptId: string) -> Promise<void>`                  | Delete script |
-| `toggleScript()` | `(siteId, scriptId: string) -> Promise<boolean>`               | Toggle enabled|
+| Function         | Signature                                                       | Purpose        |
+|------------------|-----------------------------------------------------------------|----------------|
+| `addScript()`    | `(siteId, script?: Partial<Script>) -> Promise<Script or null>` | Add to site    |
+| `updateScript()` | `(siteId, scriptId, updates) -> Promise<Script or null>`        | Update script  |
+| `removeScript()` | `(siteId, scriptId: string) -> Promise<void>`                   | Delete script  |
+| `toggleScript()` | `(siteId, scriptId: string) -> Promise<boolean>`                | Toggle enabled |
 
 ### Sources
 
