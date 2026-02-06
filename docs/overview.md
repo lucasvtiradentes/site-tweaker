@@ -176,6 +176,8 @@ site-tweaker/
 │
 ├── docs/
 │   ├── overview.md                   # This file
+│   ├── usage.md                      # Installation, configuration, usage guide
+│   ├── cicd.md                       # CI/CD workflows, scripts, git hooks
 │   └── components/
 │       ├── 1-background.md           # Service worker details
 │       ├── 2-editor.md               # Editor UI details

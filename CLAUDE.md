@@ -64,6 +64,8 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 Detailed docs available in `docs/` folder:
 
 - overview.md                - Architecture, data flow, file structure, dependencies
+- usage.md                   - Installation, configuration, usage guide
+- cicd.md                    - CI/CD workflows, scripts, git hooks
 - components/1-background.md - Service worker: CSP, injection, menus, SPA detection
 - components/2-editor.md     - Editor UI: views, state, components, handlers
 - components/3-floating-ui.md - Floating panel: shadow DOM, script execution

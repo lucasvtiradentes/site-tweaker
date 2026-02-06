@@ -9,6 +9,8 @@ Read ALL these files in PARALLEL, ALL OF THEM, not just one or two, ALL:
 ### Core Docs (docs/)
 
 - docs/overview.md
+- docs/usage.md
+- docs/cicd.md
 - docs/components/1-background.md
 - docs/components/2-editor.md
 - docs/components/3-floating-ui.md

@@ -36,6 +36,8 @@ Read ALL source files in this repository and update documentation accordingly.
 - Component lists (must match editor/components/)
 - Permissions and manifest config
 - Dependencies and versions
+- CI/CD workflows and scripts (must match .github/)
+- Usage instructions (must match current build/dev setup)
 
 ## Style Rules
 
@@ -64,6 +66,8 @@ Read ALL source files in this repository and update documentation accordingly.
 ## Files to Check
 
 - docs/overview.md
+- docs/usage.md
+- docs/cicd.md
 - docs/components/1-background.md
 - docs/components/2-editor.md
 - docs/components/3-floating-ui.md
