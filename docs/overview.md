@@ -88,16 +88,16 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
 
 ### Build
 
-| Command          | Purpose                        |
-|------------------|--------------------------------|
-| `pnpm dev`       | WXT dev server with hot reload |
-| `pnpm build`     | Production build (chrome-mv3)  |
-| `pnpm zip`       | Build + distributable zip      |
-| `pnpm lint`      | Biome linter                   |
-| `pnpm lint:fix`  | Biome linter with auto-fix     |
-| `pnpm format`    | Biome formatter                |
-| `pnpm icons`     | Generate icons from source     |
-| `pnpm prepare`   | Setup husky git hooks          |
+| Command         | Purpose                        |
+|-----------------|--------------------------------|
+| `pnpm dev`      | WXT dev server with hot reload |
+| `pnpm build`    | Production build (chrome-mv3)  |
+| `pnpm zip`      | Build + distributable zip      |
+| `pnpm lint`     | Biome linter                   |
+| `pnpm lint:fix` | Biome linter with auto-fix     |
+| `pnpm format`   | Biome formatter                |
+| `pnpm icons`    | Generate icons from source     |
+| `pnpm prepare`  | Setup husky git hooks          |
 
 ### Dependencies
 
