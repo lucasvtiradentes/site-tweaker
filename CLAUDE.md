@@ -18,13 +18,13 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 
 ## Data Model
 
-| Type         | Key Fields                                                                  |
-|--------------|-----------------------------------------------------------------------------|
-| Settings     | enabled, floatingUiEnabled, autoInjectEnabled, sites, sources, headers      |
-| Site         | id, domain, enabled, cspEnabled, scripts, urlPatterns                       |
-| Script       | id, name, code, type (js/css), enabled, autoRun, runAt                      |
-| Source       | id, url, name, enabled, token?, scripts, lastUpdated                        |
-| SourceScript | id, name, code, type, enabled, autoRun, runAt, match (domains[], paths[])   |
+| Type         | Key Fields                                                                       |
+|--------------|----------------------------------------------------------------------------------|
+| Settings     | enabled, floatingUiEnabled, autoInjectEnabled, sites, sources, headers           |
+| Site         | id, domain, enabled, cspEnabled, scripts                                         |
+| Script       | id, name, code, type (js/css), enabled, autoRun, runAt, urlPatterns              |
+| Source       | id, url, token, name, description, enabled, lastFetched, lastError, version      |
+| SourceScript | id, name, code, type, autoRun, runAt, domains[], paths[], enabled, sourceId      |
 
 ## Manifest Permissions
 

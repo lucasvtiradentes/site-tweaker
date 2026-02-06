@@ -72,6 +72,16 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
    • Configurable header types
 ```
 
+## Inter-Component Messages
+
+| Message Type             | Purpose                                  | Sent By        | Handled By |
+|--------------------------|------------------------------------------|----------------|------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI    | Background |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI    | Background |
+| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI    | Background |
+| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup  | Background |
+| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background     | Floating UI|
+
 ## Key Configuration
 
 ### Manifest Permissions
@@ -101,19 +111,21 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
 
 ### Dependencies
 
-| Package                  | Version    | Purpose                   |
-|--------------------------|------------|---------------------------|
-| wxt                      | ^0.20.5    | Chrome extension bundler  |
-| @wxt-dev/module-svelte   | ^2.0.4     | WXT Svelte integration    |
-| svelte                   | ^5.19.0    | UI component framework    |
-| tailwindcss              | ^4.0.0     | Utility-first CSS         |
-| @tailwindcss/vite        | ^4.0.0     | Tailwind Vite plugin      |
-| typescript               | ^5.7.2     | Type safety               |
-| @biomejs/biome           | ^1.9.4     | Linting and formatting    |
-| husky                    | ^9.1.7     | Git hooks                 |
-| lint-staged              | ^15.2.11   | Run linters on staged git |
-| rimraf                   | ^6.1.2     | Cross-platform rm -rf     |
-| tsx                      | ^4.21.0    | TypeScript script runner  |
+| Package                  | Version    | Purpose                        |
+|--------------------------|------------|--------------------------------|
+| wxt                      | ^0.20.5    | Chrome extension bundler       |
+| @wxt-dev/module-svelte   | ^2.0.4     | WXT Svelte integration         |
+| svelte                   | ^5.19.0    | UI component framework         |
+| tailwindcss              | ^4.0.0     | Utility-first CSS              |
+| @tailwindcss/vite        | ^4.0.0     | Tailwind Vite plugin           |
+| typescript               | ^5.7.2     | Type safety                    |
+| @types/chrome            | ^0.0.287   | Chrome API type definitions    |
+| @types/node              | ^25.0.6    | Node.js type definitions       |
+| @biomejs/biome           | ^1.9.4     | Linting and formatting         |
+| husky                    | ^9.1.7     | Git hooks                      |
+| lint-staged              | ^15.2.11   | Run linters on staged git      |
+| rimraf                   | ^6.1.2     | Cross-platform rm -rf          |
+| tsx                      | ^4.21.0    | TypeScript script runner       |
 
 ## File Structure
 

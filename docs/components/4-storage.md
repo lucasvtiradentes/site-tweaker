@@ -73,14 +73,14 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 
 ### Sites
 
-| Function            | Signature                                         | Purpose             |
-|---------------------|---------------------------------------------------|---------------------|
-| `getSiteByDomain()` | `(domain) -> Promise<Site or undefined>`          | Find site by domain |
-| `addSite()`         | `(domain: string) -> Promise<Site>`               | Create new site     |
-| `updateSite()`      | `(siteId, updates: Partial<Site>) -> Site or null`| Update site fields  |
-| `removeSite()`      | `(siteId: string) -> Promise<void>`               | Delete site         |
-| `toggleSite()`      | `(siteId: string) -> Promise<boolean>`            | Toggle enabled      |
-| `toggleSiteCsp()`   | `(siteId: string) -> Promise<boolean>`            | Toggle CSP removal  |
+| Function            | Signature                                                     | Purpose             |
+|---------------------|---------------------------------------------------------------|---------------------|
+| `getSiteByDomain()` | `(domain: string) -> Promise<Site or undefined>`              | Find site by domain |
+| `addSite()`         | `(domain: string) -> Promise<Site>`                           | Create new site     |
+| `updateSite()`      | `(siteId, updates: Partial<Site>) -> Promise<Site or null>`   | Update site fields  |
+| `removeSite()`      | `(siteId: string) -> Promise<void>`                           | Delete site         |
+| `toggleSite()`      | `(siteId: string) -> Promise<boolean>`                        | Toggle enabled      |
+| `toggleSiteCsp()`   | `(siteId: string) -> Promise<boolean>`                        | Toggle CSP removal  |
 
 ### Scripts
 
@@ -93,16 +93,16 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 
 ### Sources
 
-| Function               | Signature                                           | Purpose               |
-|------------------------|-----------------------------------------------------|-----------------------|
-| `addSource()`          | `(url: string, token?) -> Promise<Source>`          | Add GitHub source     |
-| `removeSource()`       | `(sourceId: string) -> Promise<void>`               | Delete source         |
-| `toggleSource()`       | `(sourceId: string) -> Promise<boolean>`            | Toggle source enabled |
-| `refreshSource()`      | `(sourceId: string) -> Promise<Source or null>`     | Sync with GitHub      |
-| `refreshAllSources()`  | `() -> Promise<void>`                               | Sync all sources      |
-| `toggleSourceScript()` | `(sourceId, scriptId: string) -> Promise<boolean>`  | Toggle source script  |
-| `getSourceById()`      | `(sourceId: string) -> Promise<Source or undefined>`| Find source by ID     |
-| `updateSourceToken()`  | `(sourceId, token: string or null) -> Source`       | Update GitHub token   |
+| Function               | Signature                                                        | Purpose               |
+|------------------------|------------------------------------------------------------------|-----------------------|
+| `addSource()`          | `(url: string, token: string or null) -> Promise<Source>`        | Add GitHub source     |
+| `removeSource()`       | `(sourceId: string) -> Promise<void>`                            | Delete source         |
+| `toggleSource()`       | `(sourceId: string) -> Promise<boolean>`                         | Toggle source enabled |
+| `refreshSource()`      | `(sourceId: string) -> Promise<Source or null>`                  | Sync with GitHub      |
+| `refreshAllSources()`  | `() -> Promise<void>`                                            | Sync all sources      |
+| `toggleSourceScript()` | `(sourceId, scriptId: string) -> Promise<boolean>`               | Toggle source script  |
+| `getSourceById()`      | `(sourceId: string) -> Promise<Source or undefined>`             | Find source by ID     |
+| `updateSourceToken()`  | `(sourceId, token: string or null) -> Promise<Source or null>`   | Update GitHub token   |
 
 ### Queries
 

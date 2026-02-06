@@ -110,6 +110,23 @@ JS scripts bypass strict CSP via blob URL technique:
 
 CSS scripts use direct `chrome.scripting.insertCSS` (no CSP issues).
 
+## URL Pattern Matching
+
+Site scripts support URL pattern matching to target specific paths:
+
+```
+matchesUrlPatterns(url, patterns):
+  • Empty patterns array → match all paths
+  • Glob patterns: "/app/*" → match with wildcard
+  • Simple prefix: "/settings" → startsWith match
+  • Converts glob * to regex .* for matching
+```
+
+Pattern examples:
+- `"/app/*"` - Matches `/app/dashboard`, `/app/settings/profile`, etc.
+- `"/settings"` - Matches `/settings` and `/settings/profile`
+- `"*?tab=reports"` - Matches any path with `?tab=reports` query param
+
 ## SPA Navigation Detection
 
 Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
@@ -122,12 +139,12 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 
 ## Message Handlers (Incoming)
 
-| Message Type             | Action                                  |
-|--------------------------|-----------------------------------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              |
-| `GET_SITE_DATA`          | Return site + source scripts for domain |
-| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        |
+| Message Type             | Action                                  | Sent By        |
+|--------------------------|---------------------------------------- |----------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI    |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
+| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
+| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
 
 ## Messages Sent (Outgoing)
 
