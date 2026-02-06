@@ -12,15 +12,15 @@ claude --print --verbose --dangerously-skip-permissions --output-format stream-j
       .event.delta.text
     elif .type == "stream_event" and .event.type == "content_block_start" and .event.content_block.type == "tool_use" then
       if .event.content_block.name == "TodoWrite" then
-        "\n" + $blue + "[tool] " + .event.content_block.name + " " + $reset
+        "\n" + $blue + "[tool] " + .event.content_block.name + " "
       elif .event.content_block.name == "Edit" then
-        "\n" + $orange + "[tool] " + .event.content_block.name + " " + $reset
+        "\n" + $orange + "[tool] " + .event.content_block.name + " "
       else
-        "\n" + $green + "[tool] " + .event.content_block.name + " " + $reset
+        "\n" + $green + "[tool] " + .event.content_block.name + " "
       end
     elif .type == "stream_event" and .event.type == "content_block_delta" and .event.delta.type == "input_json_delta" then
-      $green + .event.delta.partial_json + $reset
+      .event.delta.partial_json
     elif .type == "stream_event" and .event.type == "content_block_stop" then
-      "\n"
+      $reset + "\n"
     else empty end
   '
