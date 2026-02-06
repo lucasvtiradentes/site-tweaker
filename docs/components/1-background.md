@@ -21,8 +21,7 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │  SCRIPT INJECTION:                                                  │
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │  injectScript(tabId, script)                                  │  │
-│  │  ├── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
-│  │  └── CSS: chrome.scripting.insertCSS                          │  │
+│  │  └── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
 │  │                                                               │  │
 │  │  injectAutoRunScripts(tabId, url)                             │  │
 │  │  ├── Match domain against sites + sources                     │  │
@@ -108,7 +107,6 @@ JS scripts bypass strict CSP via blob URL technique:
 4. Clean up: URL.revokeObjectURL after load
 ```
 
-CSS scripts use direct `chrome.scripting.insertCSS` (no CSP issues).
 
 ## URL Pattern Matching
 

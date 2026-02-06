@@ -76,9 +76,9 @@ Derived state via `$derived`:
 | `Sidebar`           | Navigation tabs, site list, source list            |
 | `SitePanel`         | Site domain display, script list, CSP, delete      |
 | `SettingsPanel`     | Enabled toggle, floating UI, auto-inject, headers  |
-| `ScriptEditor`      | Textarea for code, name, type, autoRun, runAt      |
+| `ScriptEditor`      | Textarea for code, name, autoRun                   |
 | `ScriptList`        | Renders ScriptItem rows with toggle + actions      |
-| `ScriptItem`        | Single script row: name, type badge, toggle        |
+| `ScriptItem`        | Single script row: name, toggle                    |
 | `SourcesPanel`      | Source list with refresh all, add, enable/disable  |
 | `SourceDetails`     | Source URL, scripts, token input, refresh          |
 | `AddSiteModal`      | Domain input with normalization                    |

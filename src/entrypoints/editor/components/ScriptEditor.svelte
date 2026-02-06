@@ -25,9 +25,7 @@ const {
 }: Props = $props()
 
 let name = $state('')
-let type = $state<'js' | 'css'>('js')
 let autoRun = $state(false)
-let runAt = $state<'document_start' | 'document_end' | 'document_idle'>('document_idle')
 let enabled = $state(true)
 let urlPatterns = $state('')
 let paths = $state('')
@@ -36,27 +34,21 @@ let code = $state('')
 $effect(() => {
   if (sourceScript) {
     name = sourceScript.name
-    type = sourceScript.type
     autoRun = sourceScript.autoRun
-    runAt = sourceScript.runAt
     enabled = sourceScript.enabled
     paths = sourceScript.paths.join('\n')
     urlPatterns = ''
     code = sourceScript.code
   } else if (script) {
     name = script.name
-    type = script.type
     autoRun = script.autoRun
-    runAt = script.runAt
     enabled = script.enabled
     urlPatterns = script.urlPatterns.join('\n')
     paths = ''
     code = script.code
   } else if (isNew) {
     name = ''
-    type = 'js'
     autoRun = false
-    runAt = 'document_idle'
     enabled = true
     urlPatterns = ''
     paths = ''
@@ -71,9 +63,7 @@ const hasChanges = $derived(() => {
   if (!script) return false
   return (
     name !== script.name ||
-    type !== script.type ||
     autoRun !== script.autoRun ||
-    runAt !== script.runAt ||
     urlPatterns !== script.urlPatterns.join('\n') ||
     code !== script.code
   )
@@ -82,9 +72,7 @@ const hasChanges = $derived(() => {
 function handleSave() {
   onSave({
     name: name.trim() || 'Untitled Script',
-    type,
     autoRun,
-    runAt,
     enabled,
     urlPatterns: urlPatterns
       .split('\n')
@@ -136,18 +124,6 @@ function handleToggle() {
     </label>
 
     <label class="flex flex-col gap-1.5">
-      <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Type</span>
-      <select
-        bind:value={type}
-        disabled={readonly}
-        class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
-      >
-        <option value="js">JavaScript</option>
-        <option value="css">CSS</option>
-      </select>
-    </label>
-
-    <label class="flex flex-col gap-1.5">
       <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Mode</span>
       <select
         bind:value={autoRun}
@@ -158,21 +134,6 @@ function handleToggle() {
         <option value={true}>Auto</option>
       </select>
     </label>
-
-    {#if autoRun}
-      <label class="flex flex-col gap-1.5">
-        <span class="text-[11px] font-medium text-gray-500 uppercase tracking-wider">Run At</span>
-        <select
-          bind:value={runAt}
-          disabled={readonly}
-          class="px-3 py-2 border border-white/10 rounded-md bg-white/5 text-white text-[13px] focus:outline-none focus:border-green-400 disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          <option value="document_idle">Idle</option>
-          <option value="document_end">End</option>
-          <option value="document_start">Start</option>
-        </select>
-      </label>
-    {/if}
 
     {#if readonly && paths}
       <label class="flex flex-col gap-1.5">

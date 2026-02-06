@@ -150,43 +150,36 @@ export default defineBackground(() => {
 
   async function injectScript(tabId: number, script: Script | SourceScript): Promise<void> {
     try {
-      if (script.type === 'css') {
-        await chrome.scripting.insertCSS({
-          target: { tabId },
-          css: script.code,
-        })
-      } else {
-        const results = await chrome.scripting.executeScript({
-          target: { tabId },
-          func: (code: string, scriptName: string) => {
-            try {
-              const blob = new Blob([code], { type: 'application/javascript' })
-              const url = URL.createObjectURL(blob)
-              const el = document.createElement('script')
-              el.src = url
-              el.onload = () => {
-                el.remove()
-                URL.revokeObjectURL(url)
-              }
-              el.onerror = () => {
-                console.error(`[site-tweaker] script "${scriptName}" failed to load via blob`)
-                el.remove()
-                URL.revokeObjectURL(url)
-              }
-              document.documentElement.appendChild(el)
-              return { success: true }
-            } catch (err) {
-              console.error(`[site-tweaker] script "${scriptName}" error:`, err)
-              return { success: false, error: String(err) }
+      const results = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: (code: string, scriptName: string) => {
+          try {
+            const blob = new Blob([code], { type: 'application/javascript' })
+            const url = URL.createObjectURL(blob)
+            const el = document.createElement('script')
+            el.src = url
+            el.onload = () => {
+              el.remove()
+              URL.revokeObjectURL(url)
             }
-          },
-          args: [script.code, script.name],
-          world: 'MAIN',
-        })
-        const result = results[0]?.result as { success: boolean; error?: string } | undefined
-        if (result && !result.success) {
-          console.error(LOG, `script "${script.name}" failed:`, result.error)
-        }
+            el.onerror = () => {
+              console.error(`[site-tweaker] script "${scriptName}" failed to load via blob`)
+              el.remove()
+              URL.revokeObjectURL(url)
+            }
+            document.documentElement.appendChild(el)
+            return { success: true }
+          } catch (err) {
+            console.error(`[site-tweaker] script "${scriptName}" error:`, err)
+            return { success: false, error: String(err) }
+          }
+        },
+        args: [script.code, script.name],
+        world: 'MAIN',
+      })
+      const result = results[0]?.result as { success: boolean; error?: string } | undefined
+      if (result && !result.success) {
+        console.error(LOG, `script "${script.name}" failed:`, result.error)
       }
     } catch (err) {
       console.error(LOG, `Failed to inject script "${script.name}":`, err)
@@ -319,7 +312,7 @@ export default defineBackground(() => {
         chrome.contextMenus.create({
           id: menuId,
           parentId: MENU_PARENT_ID,
-          title: `${script.name} (${script.type.toUpperCase()})`,
+          title: script.name,
           contexts: ['page'],
         })
       }
@@ -330,7 +323,7 @@ export default defineBackground(() => {
         chrome.contextMenus.create({
           id: menuId,
           parentId: MENU_PARENT_ID,
-          title: `${script.name} (SRC/${script.type.toUpperCase()})`,
+          title: `${script.name} (SRC)`,
           contexts: ['page'],
         })
       }

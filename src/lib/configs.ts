@@ -1,21 +1,17 @@
 export interface Script {
   id: string
   name: string
-  type: 'js' | 'css'
   code: string
   enabled: boolean
   autoRun: boolean
-  runAt: 'document_start' | 'document_end' | 'document_idle'
   urlPatterns: string[]
 }
 
 export interface SourceScript {
   id: string
   name: string
-  type: 'js' | 'css'
   code: string
   autoRun: boolean
-  runAt: 'document_start' | 'document_end' | 'document_idle'
   domains: string[]
   paths: string[]
   enabled: boolean
@@ -93,11 +89,9 @@ export function createScript(partial: Partial<Script> = {}): Script {
   return {
     id: generateId(),
     name: 'New Script',
-    type: 'js',
     code: '',
     enabled: true,
     autoRun: false,
-    runAt: 'document_idle',
     urlPatterns: [],
     ...partial,
   }

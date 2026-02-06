@@ -73,15 +73,13 @@ Open the editor page (click extension icon or right-click → Options):
 2. Click "Add Script"
 3. Configure:
 
-| Field        | Options                                     | Default        |
-|--------------|---------------------------------------------|----------------|
-| Name         | Free text                                   | "New Script"   |
-| Type         | js, css                                     | js             |
-| Code         | JavaScript or CSS code                      | empty          |
-| Enabled      | Toggle on/off                               | true           |
-| Auto Run     | Inject on page load                         | false          |
-| Run At       | document_start, document_end, document_idle | document_idle  |
-| URL Patterns | Glob/regex patterns to limit injection      | [] (all pages) |
+| Field        | Options                                | Default        |
+|--------------|----------------------------------------|----------------|
+| Name         | Free text                              | "New Script"   |
+| Code         | JavaScript code                        | empty          |
+| Enabled      | Toggle on/off                          | true           |
+| Auto Run     | Inject on page load                    | false          |
+| URL Patterns | Glob/regex patterns to limit injection | [] (all pages) |
 
 ### Script Execution
 
@@ -92,7 +90,7 @@ Scripts run in two modes:
 | Auto Run    | Page load (background)    | autoRun: true       |
 | Manual      | Click in Floating UI      | autoRun: false      |
 
-JS injection uses blob URLs to bypass Content Security Policy. CSS uses direct `chrome.scripting.insertCSS`.
+JS injection uses blob URLs to bypass Content Security Policy.
 
 ### CSP Bypass
 
@@ -132,10 +130,8 @@ The repository must have a `site-tweaker.config.json` at the root:
   "scripts": [
     {
       "name": "Dark Mode",
-      "type": "js",
       "file": "scripts/dark-mode.js",
       "autoRun": true,
-      "runAt": "document_end",
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]

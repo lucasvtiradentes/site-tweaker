@@ -27,9 +27,9 @@ Injected panel on web pages for quick manual script execution. Uses Shadow DOM f
 │  │  ┌─────┐   ┌─────────────────────────────────────┐            │  │
 │  │  │ [S] │   │ Scripts             [x]             │            │  │
 │  │  │     │   │                                     │            │  │
-│  │  │ btn │   │  > My Script        JS              │            │  │
-│  │  │     │   │  > Source Script   SRC  CSS         │            │  │
-│  │  │     │   │  > Another Script   JS              │            │  │
+│  │  │ btn │   │  > My Script                        │            │  │
+│  │  │     │   │  > Source Script   SRC              │            │  │
+│  │  │     │   │  > Another Script                   │            │  │
 │  │  └─────┘   └─────────────────────────────────────┘            │  │
 │  │  (trigger)  (expandable panel)                                │  │
 │  │                                                               │  │
