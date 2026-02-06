@@ -12,7 +12,6 @@ interface SourceConfigScript {
   name: string
   file: string
   autoRun?: boolean
-  runAt?: 'document_start' | 'document_end' | 'document_idle'
   match?: {
     domains?: string[]
     paths?: string[]
@@ -153,7 +152,6 @@ export async function refreshSource(source: Source): Promise<Source> {
         name: s.name,
         code,
         autoRun: s.autoRun ?? false,
-        runAt: s.runAt ?? 'document_idle',
         domains: s.match?.domains ?? [],
         paths: s.match?.paths ?? [],
         enabled: true,
