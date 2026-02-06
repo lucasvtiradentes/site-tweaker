@@ -88,32 +88,32 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
 
 ### Build
 
-| Command          | Purpose                        |
-|------------------|--------------------------------|
-| `pnpm dev`       | WXT dev server with hot reload |
-| `pnpm build`     | Production build (chrome-mv3)  |
-| `pnpm zip`       | Build + distributable zip      |
-| `pnpm lint`      | Biome linter                   |
-| `pnpm lint:fix`  | Biome linter with auto-fix     |
-| `pnpm format`    | Biome formatter                |
-| `pnpm icons`     | Generate icons from source     |
-| `pnpm prepare`   | Setup husky git hooks          |
+| Command         | Purpose                        |
+|-----------------|--------------------------------|
+| `pnpm dev`      | WXT dev server with hot reload |
+| `pnpm build`    | Production build (chrome-mv3)  |
+| `pnpm zip`      | Build + distributable zip      |
+| `pnpm lint`     | Biome linter                   |
+| `pnpm lint:fix` | Biome linter with auto-fix     |
+| `pnpm format`   | Biome formatter                |
+| `pnpm icons`    | Generate icons from source     |
+| `pnpm prepare`  | Setup husky git hooks          |
 
 ### Dependencies
 
-| Package                  | Version    | Purpose                   |
-|--------------------------|------------|---------------------------|
-| wxt                      | ^0.20.5    | Chrome extension bundler  |
-| @wxt-dev/module-svelte   | ^2.0.4     | WXT Svelte integration    |
-| svelte                   | ^5.19.0    | UI component framework    |
-| tailwindcss              | ^4.0.0     | Utility-first CSS         |
-| @tailwindcss/vite        | ^4.0.0     | Tailwind Vite plugin      |
-| typescript               | ^5.7.2     | Type safety               |
-| @biomejs/biome           | ^1.9.4     | Linting and formatting    |
-| husky                    | ^9.1.7     | Git hooks                 |
-| lint-staged              | ^15.2.11   | Run linters on staged git |
-| rimraf                   | ^6.1.2     | Cross-platform rm -rf     |
-| tsx                      | ^4.21.0    | TypeScript script runner  |
+| Package                | Version  | Purpose                   |
+|------------------------|----------|---------------------------|
+| wxt                    | ^0.20.5  | Chrome extension bundler  |
+| @wxt-dev/module-svelte | ^2.0.4   | WXT Svelte integration    |
+| svelte                 | ^5.19.0  | UI component framework    |
+| tailwindcss            | ^4.0.0   | Utility-first CSS         |
+| @tailwindcss/vite      | ^4.0.0   | Tailwind Vite plugin      |
+| typescript             | ^5.7.2   | Type safety               |
+| @biomejs/biome         | ^1.9.4   | Linting and formatting    |
+| husky                  | ^9.1.7   | Git hooks                 |
+| lint-staged            | ^15.2.11 | Run linters on staged git |
+| rimraf                 | ^6.1.2   | Cross-platform rm -rf     |
+| tsx                    | ^4.21.0  | TypeScript script runner  |
 
 ## File Structure
 
