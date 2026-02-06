@@ -34,11 +34,9 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │  Script {                               SourceScript {                   │
 │    id: string                             id: string                     │
 │    name: string                           name: string                   │
-│    type: 'js' | 'css'                     type: 'js' | 'css'             │
 │    code: string                           code: string                   │
 │    enabled: boolean                       autoRun: boolean               │
-│    autoRun: boolean                       runAt: RunAt                   │
-│    runAt: RunAt                           domains: string[]              │
+│    autoRun: boolean                       domains: string[]              │
 │    urlPatterns: string[]                  paths: string[]                │
 │  }                                        enabled: boolean               │
 │                                           sourceId: string               │
@@ -53,7 +51,6 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │    'reporting-endpoints': boolean                                        │
 │  }                                                                       │
 │                                                                          │
-│  RunAt = 'document_start' | 'document_end' | 'document_idle'             │
 │  HeaderKey = keyof Headers                                               │
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
@@ -120,7 +117,7 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 
 | Function         | Creates                                                    |
 |------------------|------------------------------------------------------------|
-| `createScript()` | Script with defaults (enabled, js, autoRun=false, idle)    |
+| `createScript()` | Script with defaults (enabled, autoRun=false)              |
 | `createSite()`   | Site with domain (enabled, cspEnabled=false, no scripts)   |
 | `createSource()` | Source from URL + optional token (no name/scripts yet)     |
 

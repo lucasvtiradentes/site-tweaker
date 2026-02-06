@@ -50,10 +50,8 @@ Repos must contain `site-tweaker.config.json` at root:
   "scripts": [
     {
       "name": "Display Name",
-      "type": "js",
       "file": "path/to/script.js",
       "autoRun": true,
-      "runAt": "document_end",
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]

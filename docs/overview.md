@@ -1,6 +1,6 @@
 # Overview
 
-Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS on any website with domain-specific management, CSP bypass, and GitHub source integration.
+Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any website with domain-specific management, CSP bypass, and GitHub source integration.
 
 ## Architecture
 
@@ -11,7 +11,7 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
 
 ┌──────────────┐                ┌────────────────────┐                ┌────────────┐
 │   Editor     │ ◄────────────► │    Background      │ ──────────────►│  Web Page  │
-│   (Options)  │    events      │   Service Worker   │  inject JS/CSS │            │
+│   (Options)  │    events      │   Service Worker   │   inject JS    │            │
 │              │                │                    │                │            │
 │  Svelte 5    │                │  • CSP removal     │                │  ┌──────┐  │
 │  Tailwind    │                │  • Script inject   │                │  │Float │  │
@@ -54,9 +54,8 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS
                      │
                      ▼
 3. INJECTION
-   chrome.scripting.executeScript / insertCSS
+   chrome.scripting.executeScript
    • JS: blob URL injection (bypasses CSP)
-   • CSS: direct insertion
    • World: MAIN (page context)
                      │
                      ▼
