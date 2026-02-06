@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GREEN="\u001b[32m"
-RESET="\u001b[0m"
+GREEN=$'\033[32m'
+RESET=$'\033[0m'
 
 claude --print --verbose --dangerously-skip-permissions --output-format stream-json --include-partial-messages "$@" | \
   jq --unbuffered -j --arg green "$GREEN" --arg reset "$RESET" '
