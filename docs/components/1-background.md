@@ -1,0 +1,125 @@
+# 1. Background Service Worker
+
+Central hub for extension logic. Handles CSP removal, script injection, context menus, and icon state.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    BACKGROUND SERVICE WORKER                        │
+│                    (src/entrypoints/background.ts)                  │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  CSP MANAGEMENT:                                                    │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  updateCspRules()                                             │  │
+│  │  ├── Collect domains with CSP enabled                         │  │
+│  │  ├── Build declarativeNetRequest rules                        │  │
+│  │  └── Remove configured CSP headers from responses             │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  SCRIPT INJECTION:                                                  │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  injectScript(tabId, script)                                  │  │
+│  │  ├── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
+│  │  └── CSS: chrome.scripting.insertCSS                          │  │
+│  │                                                               │  │
+│  │  injectAutoRunScripts(tabId, url)                             │  │
+│  │  ├── Match domain against sites + sources                     │  │
+│  │  ├── Filter autoRun=true scripts                              │  │
+│  │  ├── Deduplicate via lastInjectedUrl map                      │  │
+│  │  └── Execute matching scripts                                 │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  MANUAL EXECUTION:                                                  │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  executeManualScript(tabId, siteId, scriptId)                 │  │
+│  │  executeSourceScript(tabId, sourceId, scriptId)               │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  CONTEXT MENUS:                                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  updateContextMenu(tab)                                       │  │
+│  │  ├── Build right-click menu for manual scripts                │  │
+│  │  └── Separate entries for site scripts and source scripts     │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  ICON STATE:                                                        │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  updateIcon(tabId)                                            │  │
+│  │  ├── active   → has scripts for current domain                │  │
+│  │  ├── outline  → no scripts but extension enabled              │  │
+│  │  └── disabled → extension globally disabled                   │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Event Listeners
+
+| Listener                                       | Purpose                              |
+|------------------------------------------------|--------------------------------------|
+| `chrome.tabs.onUpdated`                        | Inject scripts on page load/update   |
+| `chrome.webNavigation.onCommitted`             | Track navigation for deduplication   |
+| `chrome.webNavigation.onHistoryStateUpdated`   | SPA navigation detection             |
+| `chrome.tabs.onActivated`                      | Update icon on tab switch            |
+| `chrome.runtime.onMessage`                     | Handle messages from content scripts |
+| `chrome.contextMenus.onClicked`                | Execute script from context menu     |
+| `chrome.storage.onChanged`                     | Refresh CSP rules on settings change |
+
+## CSP Header Removal
+
+Uses `declarativeNetRequest` API to remove response headers:
+
+```
+Request to configured domain
+           │
+           ▼
+declarativeNetRequest rule matches
+           │
+           ▼
+Remove headers: content-security-policy,
+                content-security-policy-report-only,
+                x-frame-options, x-content-type-options,
+                x-xss-protection, permissions-policy
+           │
+           ▼
+Response arrives without CSP restrictions
+```
+
+Only active for domains with `cspEnabled: true` in site config.
+
+## Blob URL Injection
+
+JS scripts bypass strict CSP via blob URL technique:
+
+```
+1. Wrap script code in Blob object
+2. Create blob URL: URL.createObjectURL(blob)
+3. Inject via chrome.scripting.executeScript:
+   • func: creates <script src="blob:..."> element
+   • world: MAIN (page context, not isolated)
+4. Clean up: URL.revokeObjectURL after load
+```
+
+CSS scripts use direct `chrome.scripting.insertCSS` (no CSP issues).
+
+## SPA Navigation Detection
+
+Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
+
+| Event                                  | Action                                 |
+|----------------------------------------|----------------------------------------|
+| `webNavigation.onCommitted`            | Clear lastInjectedUrl for tab          |
+| `webNavigation.onHistoryStateUpdated`  | Re-inject if URL changed               |
+| `tabs.onUpdated (complete)`            | Inject if not already injected for URL |
+
+## Message Handlers
+
+| Message Type             | Action                                  |
+|--------------------------|-----------------------------------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              |
+| `GET_SITE_DATA`          | Return site + source scripts for domain |
+| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        |
+| `URL_CHANGED`            | Forward to content scripts for reinit   |
