@@ -65,15 +65,17 @@ Repos must contain `site-tweaker.config.json` at root:
 
 ## Key Functions
 
-| Function                           | Purpose                                     |
-|------------------------------------|---------------------------------------------|
-| `parseGitHubUrl(url)`              | Extract owner, repo, branch from GitHub URL |
-| `fetchSourceConfig(url, token?)`   | Download and validate config.json           |
-| `fetchScriptFile(url, token?)`     | Download script file (base64 decode)        |
-| `refreshSource(source)`            | Re-fetch config + all script files          |
-| `getMatchingSourceScripts()`       | Filter source scripts by domain + path      |
-| `matchesDomainPattern()`           | Domain match with wildcard support          |
-| `matchesPathPattern()`             | Path match with glob and regex support      |
+| Function                                           | Purpose                                         |
+|----------------------------------------------------|-------------------------------------------------|
+| `parseGitHubUrl(url)`                              | Extract owner, repo, branch, path from URL      |
+| `validateSourceConfig(config)`                     | Validate config schema (version, name, scripts) |
+| `fetchSourceConfig(parsed, token?)`                | Download and validate config.json               |
+| `fetchScriptFile(parsed, file, token?)`            | Download script file (base64 decode)            |
+| `refreshSource(source)`                            | Re-fetch config + all script files              |
+| `getMatchingSourceScripts(sources, domain, path)`  | Filter source scripts by domain + path          |
+| `matchesDomainPattern(domain, pattern)`            | Domain match with wildcard support              |
+| `matchesPathPattern(path, patterns)`               | Path match with glob and regex support          |
+| `getDisplayUrl(url)`                               | Short display format (owner/repo)               |
 
 ## GitHub API
 
@@ -81,10 +83,11 @@ Uses GitHub Contents API to fetch files:
 
 ```
 GET https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={branch}
-Authorization: token {github_token}  (if private repo)
+Accept: application/vnd.github.v3+json
+Authorization: Bearer {github_token}  (if private repo)
 ```
 
-Response content is base64-encoded, decoded via `atob()`.
+Response content is base64-encoded, decoded via `atob()` + `TextDecoder('utf-8')`.
 
 ## Domain Pattern Matching
 
@@ -121,7 +124,7 @@ Download each script file referenced in config
 Update source.scripts[] with new code
         │
         ▼
-Set source.lastUpdated timestamp
+Set source.lastFetched timestamp
         │
         ▼
 Save to chrome.storage.local
@@ -129,4 +132,4 @@ Save to chrome.storage.local
 
 ## Private Repos
 
-Optional GitHub token stored per source. Token included in API requests as `Authorization: token {token}` header. Token managed via SourceDetails component in editor.
+Optional GitHub token stored per source. Token included in API requests as `Authorization: Bearer {token}` header. Token managed via SourceDetails component in editor.

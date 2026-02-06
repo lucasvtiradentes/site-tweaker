@@ -48,16 +48,17 @@ Full-featured UI for managing sites, scripts, sources, and settings. Built with 
 
 Svelte 5 runes for reactive state:
 
-| State Variable         | Type       | Purpose                          |
-|------------------------|------------|----------------------------------|
-| `settings`             | `$state`   | Full extension configuration     |
-| `currentView`          | `$state`   | Active panel name                |
-| `currentSiteId`        | `$state`   | Selected site ID                 |
-| `currentSourceId`      | `$state`   | Selected source ID               |
-| `currentScriptId`      | `$state`   | Selected script ID               |
-| `isNewScript`          | `$state`   | New script creation mode         |
-| `showAddSiteModal`     | `$state`   | Add site modal visibility        |
-| `showAddSourceModal`   | `$state`   | Add source modal visibility      |
+| State Variable          | Type       | Purpose                          |
+|-------------------------|------------|----------------------------------|
+| `settings`              | `$state`   | Full extension configuration     |
+| `currentView`           | `$state`   | Active panel name                |
+| `currentSiteId`         | `$state`   | Selected site ID                 |
+| `currentSourceId`       | `$state`   | Selected source ID               |
+| `currentScriptId`       | `$state`   | Selected script ID               |
+| `viewingSourceScript`   | `$state`   | Source script being viewed       |
+| `isNewScript`           | `$state`   | New script creation mode         |
+| `showAddSiteModal`      | `$state`   | Add site modal visibility        |
+| `showAddSourceModal`    | `$state`   | Add source modal visibility      |
 
 Derived state via `$derived`:
 
@@ -90,11 +91,24 @@ Derived state via `$derived`:
 
 ## Key Handlers
 
-| Handler                | Action                                    |
-|------------------------|-------------------------------------------|
-| `loadSettings()`       | Fetch from chrome.storage, update state   |
-| `selectSite(id)`       | Switch to site view                       |
-| `selectScript(id)`     | Open script in editor                     |
-| `saveScript()`         | Create new or update existing script      |
-| `handleAddSource()`    | Add GitHub source with optional token     |
-| `refreshAllSources()`  | Sync all sources with GitHub              |
+| Handler                              | Action                                       |
+|--------------------------------------|----------------------------------------------|
+| `loadSettings()`                     | Fetch from chrome.storage, update state      |
+| `selectSite(id)`                     | Switch to site view                          |
+| `selectScript(id)`                   | Open script in editor                        |
+| `selectSourceScript(script)`         | View source script (read-only)               |
+| `clearScriptView()`                  | Return from script editor to site panel      |
+| `saveScript(data)`                   | Create new or update existing script         |
+| `deleteScript()`                     | Delete current script (with confirmation)    |
+| `deleteScriptFromList(scriptId)`     | Delete script from list view                 |
+| `toggleScript(scriptId)`             | Toggle script enabled/disabled               |
+| `handleAddSite(domain)`              | Add new site (normalize + dedup)             |
+| `handleSelectDomain(domain)`         | Select or create site by domain              |
+| `deleteSite()`                       | Delete current site (with confirmation)      |
+| `toggleSiteCsp()`                    | Toggle CSP bypass for current site           |
+| `handleAddSource(url, token)`        | Add GitHub source with optional token        |
+| `deleteSource(sourceId)`             | Delete source (with confirmation)            |
+| `handleRefreshSource()`              | Refresh current source from GitHub           |
+| `handleRefreshAllSources()`          | Sync all sources with GitHub                 |
+| `handleToggleSourceScript(scriptId)` | Toggle source script enabled                 |
+| `handleUpdateSourceToken(token)`     | Update source GitHub token                   |

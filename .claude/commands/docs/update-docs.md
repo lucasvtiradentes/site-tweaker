@@ -72,45 +72,7 @@ Read ALL source files in this repository and update documentation accordingly.
 
 ## Final Step: Alignment Verification
 
-After ALL content updates are done, re-read every doc file and verify alignment.
-
-Check every table: the separator width MUST be >= the longest cell content in that column.
-
-BAD (cell overflows separator):
-```md
-| Function           | Purpose        |
-|--------------------|----------------|
-| `shortName()`      | Does something |
-| `veryLongFunctionName()` | Breaks  |
-```
-
-GOOD (separator accommodates longest cell):
-```md
-| Function                   | Purpose        |
-|----------------------------|----------------|
-| `shortName()`              | Does something |
-| `veryLongFunctionName()`   | Fixed          |
-```
-
-Check every ASCII diagram: count characters per line inside boxes. Every line between `┌─┐` and `└─┘` MUST have the same total width. Inner `│` borders must align vertically across all lines.
-
-BAD (content wider than box border):
-```
-┌──────────────────┐
-│  Short content   │
-│  • Longer content │
-└──────────────────┘
-```
-
-GOOD (box widened to fit all content):
-```
-┌────────────────────┐
-│  Short content     │
-│  • Longer content  │
-└────────────────────┘
-```
-
-Fix any violations found before finishing.
+After ALL content updates are done, run the `/docs:fix-docs-alignment` skill to detect and fix alignment issues in tables and ASCII diagrams.
 
 ## Output
 

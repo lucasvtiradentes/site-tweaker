@@ -42,12 +42,10 @@ Injected panel on web pages for quick manual script execution. Uses Shadow DOM f
 
 ## Content Script Config
 
-| Property             | Value                             |
-|----------------------|-----------------------------------|
-| `matches`            | `<all_urls>`                      |
-| `runAt`              | `document_idle`                   |
-| `cssInjectionMode`   | `manual` (via shadow DOM)         |
-| `registration`       | `runtime` (conditional injection) |
+| Property   | Value          |
+|------------|----------------|
+| `matches`  | `<all_urls>`   |
+| `runAt`    | `document_idle`|
 
 ## State
 

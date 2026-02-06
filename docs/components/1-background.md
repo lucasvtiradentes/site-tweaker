@@ -33,8 +33,8 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  MANUAL EXECUTION:                                                  │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  executeManualScript(tabId, siteId, scriptId)                 │  │
-│  │  executeSourceScript(tabId, sourceId, scriptId)               │  │
+│  │  executeManualScript(siteId, scriptId, tabId)                 │  │
+│  │  executeSourceScript(sourceId, scriptId, tabId)               │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  CONTEXT MENUS:                                                     │
@@ -46,7 +46,7 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  ICON STATE:                                                        │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  updateIcon(tabId)                                            │  │
+│  │  updateIconForTab(tabId, url)                                 │  │
 │  │  ├── active   → has scripts for current domain                │  │
 │  │  ├── outline  → no scripts but extension enabled              │  │
 │  │  └── disabled → extension globally disabled                   │  │
@@ -57,15 +57,16 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 
 ## Event Listeners
 
-| Listener                                       | Purpose                              |
-|------------------------------------------------|--------------------------------------|
-| `chrome.tabs.onUpdated`                        | Inject scripts on page load/update   |
-| `chrome.webNavigation.onCommitted`             | Track navigation for deduplication   |
-| `chrome.webNavigation.onHistoryStateUpdated`   | SPA navigation detection             |
-| `chrome.tabs.onActivated`                      | Update icon on tab switch            |
-| `chrome.runtime.onMessage`                     | Handle messages from content scripts |
-| `chrome.contextMenus.onClicked`                | Execute script from context menu     |
-| `chrome.storage.onChanged`                     | Refresh CSP rules on settings change |
+| Listener                                       | Purpose                                    |
+|------------------------------------------------|--------------------------------------------|
+| `chrome.tabs.onUpdated`                        | Inject scripts + update icon on page load  |
+| `chrome.webNavigation.onCommitted`             | Track navigation for deduplication         |
+| `chrome.webNavigation.onHistoryStateUpdated`   | SPA navigation detection + URL_CHANGED msg |
+| `chrome.tabs.onActivated`                      | Update icon + context menu on tab switch   |
+| `chrome.tabs.onRemoved`                        | Clean up lastInjectedUrl map               |
+| `chrome.runtime.onMessage`                     | Handle messages from content scripts       |
+| `chrome.contextMenus.onClicked`                | Execute script from context menu           |
+| `chrome.storage.onChanged`                     | Refresh CSP rules on settings change       |
 
 ## CSP Header Removal
 
@@ -78,16 +79,21 @@ Request to configured domain
 declarativeNetRequest rule matches
            │
            ▼
-Remove headers: content-security-policy,
-                content-security-policy-report-only,
-                x-frame-options, x-content-type-options,
-                x-xss-protection, permissions-policy
+Remove headers (configurable in Settings):
+  content-security-policy
+  content-security-policy-report-only
+  x-webkit-csp
+  x-content-security-policy
+  x-content-security-policy-report-only
+  x-webkit-csp-report-only
+  report-to
+  reporting-endpoints
            │
            ▼
 Response arrives without CSP restrictions
 ```
 
-Only active for domains with `cspEnabled: true` in site config.
+Only active for domains with `cspEnabled: true` in site config or source script domains.
 
 ## Blob URL Injection
 
@@ -114,7 +120,7 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 | `webNavigation.onHistoryStateUpdated`  | Re-inject if URL changed               |
 | `tabs.onUpdated (complete)`            | Inject if not already injected for URL |
 
-## Message Handlers
+## Message Handlers (Incoming)
 
 | Message Type             | Action                                  |
 |--------------------------|-----------------------------------------|
@@ -122,4 +128,9 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 | `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              |
 | `GET_SITE_DATA`          | Return site + source scripts for domain |
 | `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        |
-| `URL_CHANGED`            | Forward to content scripts for reinit   |
+
+## Messages Sent (Outgoing)
+
+| Message Type     | Trigger                                       |
+|------------------|-----------------------------------------------|
+| `URL_CHANGED`    | Sent to tabs on `onHistoryStateUpdated` (SPA) |
