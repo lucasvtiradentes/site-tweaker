@@ -1,7 +1,6 @@
 export interface Script {
   id: string
   name: string
-  type: 'js' | 'css'
   code: string
   enabled: boolean
   autoRun: boolean
@@ -12,7 +11,6 @@ export interface Script {
 export interface SourceScript {
   id: string
   name: string
-  type: 'js' | 'css'
   code: string
   autoRun: boolean
   runAt: 'document_start' | 'document_end' | 'document_idle'
@@ -93,7 +91,6 @@ export function createScript(partial: Partial<Script> = {}): Script {
   return {
     id: generateId(),
     name: 'New Script',
-    type: 'js',
     code: '',
     enabled: true,
     autoRun: false,

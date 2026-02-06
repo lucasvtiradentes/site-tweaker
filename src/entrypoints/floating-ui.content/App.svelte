@@ -76,9 +76,6 @@ function handleClickOutside(e: MouseEvent) {
                 <polygon points="5,3 19,12 5,21"/>
               </svg>
               <span class="wc-script-name">{script.name}</span>
-              <span class="wc-script-type" class:css={script.type === 'css'}>
-                {script.type.toUpperCase()}
-              </span>
             </button>
           </li>
         {/each}
@@ -94,9 +91,6 @@ function handleClickOutside(e: MouseEvent) {
               </svg>
               <span class="wc-script-name">{script.name}</span>
               <span class="wc-script-type wc-source">SRC</span>
-              <span class="wc-script-type" class:css={script.type === 'css'}>
-                {script.type.toUpperCase()}
-              </span>
             </button>
           </li>
         {/each}

@@ -23,81 +23,34 @@ const {
   onToggleSourceScript,
 }: Props = $props()
 
-const jsScripts = $derived(scripts.filter((s) => s.type === 'js'))
-const cssScripts = $derived(scripts.filter((s) => s.type === 'css'))
-const jsSourceScripts = $derived(sourceScripts.filter((s) => s.type === 'js'))
-const cssSourceScripts = $derived(sourceScripts.filter((s) => s.type === 'css'))
-const hasScripts = $derived(jsScripts.length > 0 || jsSourceScripts.length > 0)
-const hasStyles = $derived(cssScripts.length > 0 || cssSourceScripts.length > 0)
-const isEmpty = $derived(!hasScripts && !hasStyles)
+const isEmpty = $derived(scripts.length === 0 && sourceScripts.length === 0)
 </script>
 
 {#if isEmpty}
   <EmptyState icon="file" title="No scripts" />
 {:else}
-  <div class="space-y-4">
-    <section>
-      <h4 class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-2">Scripts</h4>
-      {#if !hasScripts}
-        <p class="text-[11px] text-gray-600 py-1">None</p>
-      {:else}
-        <ul class="space-y-1">
-          {#each jsScripts as script (script.id)}
-            <ScriptItem
-              name={script.name}
-              enabled={script.enabled}
-              autoRun={script.autoRun}
-              canDelete={!!onDeleteScript}
-              onSelect={onSelectScript ? () => onSelectScript(script.id) : undefined}
-              onToggle={() => onToggleScript?.(script.id)}
-              onDelete={() => onDeleteScript?.(script.id)}
-            />
-          {/each}
-          {#each jsSourceScripts as script (script.id)}
-            <ScriptItem
-              name={script.name}
-              enabled={script.enabled}
-              autoRun={script.autoRun}
-              isSource
-              paths={script.paths}
-              onSelect={onSelectSourceScript ? () => onSelectSourceScript(script) : undefined}
-              onToggle={() => onToggleSourceScript?.(script.sourceId, script.id)}
-            />
-          {/each}
-        </ul>
-      {/if}
-    </section>
-
-    <section>
-      <h4 class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-2">Styles</h4>
-      {#if !hasStyles}
-        <p class="text-[11px] text-gray-600 py-1">None</p>
-      {:else}
-        <ul class="space-y-1">
-          {#each cssScripts as script (script.id)}
-            <ScriptItem
-              name={script.name}
-              enabled={script.enabled}
-              autoRun={script.autoRun}
-              canDelete={!!onDeleteScript}
-              onSelect={onSelectScript ? () => onSelectScript(script.id) : undefined}
-              onToggle={() => onToggleScript?.(script.id)}
-              onDelete={() => onDeleteScript?.(script.id)}
-            />
-          {/each}
-          {#each cssSourceScripts as script (script.id)}
-            <ScriptItem
-              name={script.name}
-              enabled={script.enabled}
-              autoRun={script.autoRun}
-              isSource
-              paths={script.paths}
-              onSelect={onSelectSourceScript ? () => onSelectSourceScript(script) : undefined}
-              onToggle={() => onToggleSourceScript?.(script.sourceId, script.id)}
-            />
-          {/each}
-        </ul>
-      {/if}
-    </section>
-  </div>
+  <ul class="space-y-1">
+    {#each scripts as script (script.id)}
+      <ScriptItem
+        name={script.name}
+        enabled={script.enabled}
+        autoRun={script.autoRun}
+        canDelete={!!onDeleteScript}
+        onSelect={onSelectScript ? () => onSelectScript(script.id) : undefined}
+        onToggle={() => onToggleScript?.(script.id)}
+        onDelete={() => onDeleteScript?.(script.id)}
+      />
+    {/each}
+    {#each sourceScripts as script (script.id)}
+      <ScriptItem
+        name={script.name}
+        enabled={script.enabled}
+        autoRun={script.autoRun}
+        isSource
+        paths={script.paths}
+        onSelect={onSelectSourceScript ? () => onSelectSourceScript(script) : undefined}
+        onToggle={() => onToggleSourceScript?.(script.sourceId, script.id)}
+      />
+    {/each}
+  </ul>
 {/if}

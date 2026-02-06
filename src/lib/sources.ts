@@ -10,7 +10,6 @@ interface ParsedGitHubUrl {
 
 interface SourceConfigScript {
   name: string
-  type: 'js' | 'css'
   file: string
   autoRun?: boolean
   runAt?: 'document_start' | 'document_end' | 'document_idle'
@@ -89,7 +88,6 @@ export function validateSourceConfig(config: unknown): config is SourceConfig {
 
   for (const script of c.scripts) {
     if (typeof script.name !== 'string') return false
-    if (script.type !== 'js' && script.type !== 'css') return false
     if (typeof script.file !== 'string') return false
   }
 
@@ -153,7 +151,6 @@ export async function refreshSource(source: Source): Promise<Source> {
       scripts.push({
         id: generateId(),
         name: s.name,
-        type: s.type,
         code,
         autoRun: s.autoRun ?? false,
         runAt: s.runAt ?? 'document_idle',
