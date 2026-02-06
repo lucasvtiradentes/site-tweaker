@@ -1,0 +1,78 @@
+name: Update Docs
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  update-docs:
+    name: Update documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run update-docs
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          .github/scripts/run-claude.sh "/docs:update-docs"
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate PR description
+        if: steps.changes.outputs.has_changes == 'true'
+        id: description
+        run: |
+          FILES=$(git diff --name-only)
+          STAT=$(git diff --stat)
+          BODY=$(cat <<EOF
+          ## Automated docs update
+
+          Changed files:
+          $(echo "$FILES" | sed 's/^/- /')
+
+          \`\`\`
+          $STAT
+          \`\`\`
+          EOF
+          )
+          echo "body<<DELIM" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "DELIM" >> $GITHUB_OUTPUT
+
+      - name: Create PR
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="docs/auto-update-$(date +%Y%m%d-%H%M%S)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          git commit -m "docs: update documentation"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "docs: update documentation" \
+            --body "${{ steps.description.outputs.body }}" \
+            --base main \
+            --head "$BRANCH"
