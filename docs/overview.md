@@ -165,7 +165,7 @@ site-tweaker/
 │       │       ├── AddSourceModal.svelte # Add GitHub source dialog
 │       │       ├── Toggle.svelte        # Reusable toggle
 │       │       ├── Modal.svelte         # Generic modal wrapper
-│       │       ├── Icon.svelte          # Icon library
+│       │       ├── Icon.svelte          # SVG icon library (13 icons)
 │       │       ├── SettingRow.svelte    # Labeled setting row
 │       │       ├── EmptyState.svelte    # Empty list placeholder
 │       │       └── index.ts            # Component barrel export

@@ -73,15 +73,15 @@ Open the editor page (click extension icon or right-click → Options):
 2. Click "Add Script"
 3. Configure:
 
-| Field       | Options                                    | Default        |
-|-------------|--------------------------------------------|----------------|
-| Name        | Free text                                  | "New Script"   |
-| Type        | js, css                                    | js             |
-| Code        | JavaScript or CSS code                     | empty          |
-| Enabled     | Toggle on/off                              | true           |
-| Auto Run    | Inject on page load                        | false          |
-| Run At      | document_start, document_end, document_idle | document_idle |
-| URL Patterns| Glob/regex patterns to limit injection     | [] (all pages) |
+| Field        | Options                                     | Default        |
+|--------------|---------------------------------------------|----------------|
+| Name         | Free text                                   | "New Script"   |
+| Type         | js, css                                     | js             |
+| Code         | JavaScript or CSS code                      | empty          |
+| Enabled      | Toggle on/off                               | true           |
+| Auto Run     | Inject on page load                         | false          |
+| Run At       | document_start, document_end, document_idle | document_idle  |
+| URL Patterns | Glob/regex patterns to limit injection      | [] (all pages) |
 
 ### Script Execution
 
@@ -102,7 +102,10 @@ When CSP is enabled for a site, the extension removes these headers via declarat
 - content-security-policy-report-only
 - x-webkit-csp
 - x-content-security-policy
-- report-to, reporting-endpoints
+- x-content-security-policy-report-only
+- x-webkit-csp-report-only
+- report-to
+- reporting-endpoints
 
 Each header type can be individually toggled in Settings.
 

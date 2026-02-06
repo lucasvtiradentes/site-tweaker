@@ -85,7 +85,7 @@ Derived state via `$derived`:
 | `AddSourceModal`    | GitHub URL + optional access token                 |
 | `Toggle`            | Reusable on/off checkbox                           |
 | `Modal`             | Generic modal wrapper with backdrop                |
-| `Icon`              | SVG icon library component                         |
+| `Icon`              | SVG icon library (13 icons)                        |
 | `SettingRow`        | Labeled row for settings                           |
 | `EmptyState`        | Placeholder for empty lists                        |
 
@@ -110,5 +110,9 @@ Derived state via `$derived`:
 | `deleteSource(sourceId)`             | Delete source (with confirmation)            |
 | `handleRefreshSource()`              | Refresh current source from GitHub           |
 | `handleRefreshAllSources()`          | Sync all sources with GitHub                 |
+| `handleToggleSource(sourceId)`       | Toggle source enabled/disabled               |
 | `handleToggleSourceScript(scriptId)` | Toggle source script enabled                 |
+| `handleToggleSourceScriptFromSite()` | Toggle source script from site panel         |
 | `handleUpdateSourceToken(token)`     | Update source GitHub token                   |
+| `toggleCurrentScriptEnabled()`       | Toggle current script in editor              |
+| `cancelEdit()`                       | Cancel edit and return to site panel         |

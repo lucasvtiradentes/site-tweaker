@@ -6,13 +6,13 @@
 
 Automated documentation maintenance using Claude Code CLI.
 
-| Setting          | Value                              |
-|------------------|------------------------------------|
-| Trigger          | Daily cron (00:00 UTC) + manual    |
-| Runner           | ubuntu-latest                      |
-| Timeout          | 15 minutes                         |
-| Node             | 22                                 |
-| Permissions      | contents: write, pull-requests: write |
+| Setting          | Value                                     |
+|------------------|-------------------------------------------|
+| Trigger          | Daily cron (00:00 UTC) + manual           |
+| Runner           | ubuntu-latest                             |
+| Timeout          | 15 minutes                                |
+| Node             | 22                                        |
+| Permissions      | contents: write, pull-requests: write     |
 
 ### Pipeline Steps
 
@@ -50,13 +50,13 @@ Usage:
 
 Flags passed to Claude Code:
 
-| Flag                        | Purpose                              |
-|-----------------------------|--------------------------------------|
-| --print                     | Non-interactive, pipe-friendly       |
-| --verbose                   | Required for stream-json             |
-| --dangerously-skip-permissions | Bypass permission prompts in CI   |
-| --output-format stream-json | Emit JSON events per token           |
-| --include-partial-messages  | Stream tokens as they arrive         |
+| Flag                             | Purpose                              |
+|----------------------------------|--------------------------------------|
+| --print                          | Non-interactive, pipe-friendly       |
+| --verbose                        | Required for stream-json             |
+| --dangerously-skip-permissions   | Bypass permission prompts in CI      |
+| --output-format stream-json      | Emit JSON events per token           |
+| --include-partial-messages       | Stream tokens as they arrive         |
 
 ### Streaming Output
 
@@ -71,11 +71,11 @@ Pipes Claude's stream-json through jq to display readable, color-coded output:
 
 ### Claude Commands (.claude/commands/docs/)
 
-| Command            | File                  | Purpose                                |
-|--------------------|-----------------------|----------------------------------------|
-| /docs:update-docs  | update-docs.md        | Read all source + docs, update outdated sections |
-| /docs:read-docs    | read-docs.md          | Warm-up: read all docs into context    |
-| /docs:fix-docs-alignment | fix-docs-alignment.md | Fix table and ASCII diagram alignment |
+| Command                  | File                  | Purpose                                          |
+|--------------------------|-----------------------|--------------------------------------------------|
+| /docs:update-docs        | update-docs.md        | Read all source + docs, update outdated sections |
+| /docs:read-docs          | read-docs.md          | Warm-up: read all docs into context              |
+| /docs:fix-docs-alignment | fix-docs-alignment.md | Fix table and ASCII diagram alignment            |
 
 ## Git Hooks
 

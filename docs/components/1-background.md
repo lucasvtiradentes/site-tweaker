@@ -39,7 +39,7 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  CONTEXT MENUS:                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  updateContextMenu(tab)                                       │  │
+│  │  updateContextMenu(tabId, url)                                │  │
 │  │  ├── Build right-click menu for manual scripts                │  │
 │  │  └── Separate entries for site scripts and source scripts     │  │
 │  └───────────────────────────────────────────────────────────────┘  │

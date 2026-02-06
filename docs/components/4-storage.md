@@ -110,6 +110,7 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 |----------------------------|------------------------------------------------|--------------------------------|
 | `getScriptsForDomain()`    | `(domain) -> Promise<{site, scripts} or null>` | Get site + enabled scripts     |
 | `getMatchingSourceScripts` | Re-exported from sources.ts                    | Filter source scripts by match |
+| `normalizeDomain`          | Re-exported from utils.ts                      | Normalize domain string        |
 
 ## ID Generation
 

@@ -26,7 +26,7 @@ Import script collections from GitHub repositories. Supports private repos via a
 │                                                                   │
 │  MATCHING:                                                        │
 │  ┌─────────────────────────────────────────────────────────────┐  │
-│  │  getMatchingSourceScripts(domain, path, sources)            │  │
+│  │  getMatchingSourceScripts(sources, domain, path)            │  │
 │  │  ├── matchesDomainPattern(domain, pattern)                  │  │
 │  │  │   ├── Exact: "example.com"                               │  │
 │  │  │   └── Wildcard: "*.example.com"                          │  │
