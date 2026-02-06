@@ -32,7 +32,11 @@ jobs:
               if .type == "stream_event" and .event.type == "content_block_delta" and .event.delta.type == "text_delta" then
                 .event.delta.text
               elif .type == "stream_event" and .event.type == "content_block_start" and .event.content_block.type == "tool_use" then
-                "\n[tool] " + .event.content_block.name + "\n"
+                "\n[tool] " + .event.content_block.name + " "
+              elif .type == "stream_event" and .event.type == "content_block_delta" and .event.delta.type == "input_json_delta" then
+                .event.delta.partial_json
+              elif .type == "stream_event" and .event.type == "content_block_stop" then
+                "\n"
               else empty end
             '
 
