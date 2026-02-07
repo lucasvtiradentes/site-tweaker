@@ -73,13 +73,16 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 
 ## Inter-Component Messages
 
-| Message Type             | Purpose                                  | Sent By        | Handled By |
-|--------------------------|------------------------------------------|----------------|------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI    | Background |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI    | Background |
-| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI    | Background |
-| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup  | Background |
-| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background     | Floating UI|
+| Message Type              | Purpose                                  | Sent By          | Handled By      |
+|---------------------------|------------------------------------------|------------------|-----------------|
+| `EXECUTE_SCRIPT`          | Run site script manually                 | Floating UI      | Background      |
+| `EXECUTE_SOURCE_SCRIPT`   | Run source script manually               | Floating UI      | Background      |
+| `GET_SITE_DATA`           | Fetch site + source scripts for domain   | Floating UI      | Background      |
+| `GET_CURRENT_TAB_INFO`    | Get active tab URL and domain            | Editor, Popup    | Background      |
+| `URL_CHANGED`             | Notify SPA navigation (URL changed)      | Background       | Floating UI     |
+| `CSP_BYPASS_FETCH`        | Proxy fetch request (bypass CSP)         | CSP Bypass       | Background      |
+| `ST_FETCH_PROXY_REQUEST`  | Fetch request from page script           | Page (injected)  | CSP Bypass      |
+| `ST_FETCH_PROXY_RESPONSE` | Fetch response to page script            | CSP Bypass       | Page (injected) |
 
 ## Key Configuration
 
@@ -137,6 +140,7 @@ site-tweaker/
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
+│   │   ├── csp-bypass-client.ts      # CSP bypass proxy client code generator
 │   │   └── utils.ts                  # Domain extraction, date formatting
 │   │
 │   ├── assets/
@@ -164,14 +168,16 @@ site-tweaker/
 │       │       ├── AddSourceModal.svelte # Add GitHub source dialog
 │       │       ├── Toggle.svelte        # Reusable toggle
 │       │       ├── Modal.svelte         # Generic modal wrapper
-│       │       ├── Icon.svelte          # SVG icon library (13 icons)
+│       │       ├── Icon.svelte          # SVG icon library
 │       │       ├── SettingRow.svelte    # Labeled setting row
 │       │       ├── EmptyState.svelte    # Empty list placeholder
 │       │       └── index.ts            # Component barrel export
-│       └── floating-ui.content/
-│           ├── index.ts              # Content script entry (shadow DOM)
-│           ├── App.svelte            # Floating panel component
-│           └── style.css             # Isolated panel styles
+│       ├── floating-ui.content/
+│       │   ├── index.ts              # Content script entry (shadow DOM)
+│       │   ├── App.svelte            # Floating panel component
+│       │   └── style.css             # Isolated panel styles
+│       └── csp-bypass.content/
+│           └── index.ts              # CSP bypass proxy content script
 │
 ├── docs/
 │   ├── overview.md                   # This file

@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for service"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["*.api.example.com", "cdn.example.com"]
     }
   ]
 }
@@ -73,6 +80,8 @@ Repos must contain `site-tweaker.config.json` at root:
 | `getMatchingSourceScripts(sources, domain, path)`  | Filter source scripts by domain + path          |
 | `matchesDomainPattern(domain, pattern)`            | Domain match with wildcard support              |
 | `matchesPathPattern(path, patterns)`               | Path match with glob and regex support          |
+| `matchesCspBypassPattern(url, patterns)`           | Check if URL matches CSP bypass pattern         |
+| `generateCspBypassCode(domains)`                   | Generate CSP bypass proxy client code           |
 | `getDisplayUrl(url)`                               | Short display format (owner/repo)               |
 
 ## GitHub API
@@ -131,3 +140,46 @@ Save to chrome.storage.local
 ## Private Repos
 
 Optional GitHub token stored per source. Token included in API requests as `Authorization: Bearer {token}` header. Token managed via SourceDetails component in editor.
+
+## Environment Variables
+
+Sources can define environment variables that users must configure:
+
+```
+Config defines env array:
+  { "env": [{ "key": "API_KEY", "description": "Your API key" }] }
+        │
+        ▼
+Source.env stores variable definitions
+        │
+        ▼
+Source.envValues stores user-provided values
+  { "API_KEY": "user-secret-value" }
+        │
+        ▼
+Injected as constants at top of script:
+  const API_KEY = "user-secret-value";
+```
+
+Env values managed via `updateSourceEnvValues()` in storage API.
+
+## CSP Bypass
+
+Scripts can specify domains requiring CSP bypass for fetch requests:
+
+```json
+{
+  "cspBypass": ["*.api.example.com", "cdn.example.com"]
+}
+```
+
+When a script has `cspBypass` domains:
+1. `generateCspBypassCode(domains)` prepends proxy code to script
+2. Proxy intercepts `fetch()` calls matching the patterns
+3. Requests forwarded: Page → CSP Bypass content script → Background → Network
+4. No CSP console errors for configured domains
+
+Pattern matching supports:
+- Exact: `api.example.com`
+- Wildcard subdomain: `*.example.com` (matches `foo.example.com`, `api.example.com`, etc.)
+- Substring: Any hostname containing the pattern

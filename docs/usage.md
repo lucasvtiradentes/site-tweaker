@@ -80,6 +80,7 @@ Open the editor page (click extension icon or right-click → Options):
 | Enabled      | Toggle on/off                          | true           |
 | Auto Run     | Inject on page load                    | false          |
 | URL Patterns | Glob/regex patterns to limit injection | [] (all pages) |
+| CSP Bypass   | Domain patterns for fetch proxy        | [] (disabled)  |
 
 ### Script Execution
 
@@ -127,6 +128,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for the service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +142,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["*.api.example.com"]
     }
   ]
 }
@@ -159,6 +167,57 @@ The repository must have a `site-tweaker.config.json` at the root:
 ### Refreshing Sources
 
 Click the refresh button on a source to re-fetch the config and all scripts from GitHub. Sources can also be refreshed individually or all at once from the editor.
+
+### Environment Variables
+
+Sources can define environment variables in their config file. Users must provide values for these variables in the source settings:
+
+1. Source config defines required variables in `env` array
+2. Extension prompts user to provide values in source details panel
+3. Values are injected as constants at the top of each script from that source
+
+Example:
+
+```json
+{
+  "env": [
+    { "key": "API_TOKEN", "description": "Your API token" },
+    { "key": "BASE_URL", "description": "API base URL" }
+  ]
+}
+```
+
+The script will receive:
+
+```javascript
+const API_TOKEN = "user-provided-value";
+const BASE_URL = "https://api.example.com";
+
+// Rest of script code...
+```
+
+### CSP Bypass for Fetch
+
+Scripts can bypass Content Security Policy restrictions for specific domains using the CSP bypass proxy:
+
+1. Add `cspBypass` array to script config with domain patterns
+2. Extension prepends proxy code to intercept `fetch()` calls
+3. Matching requests are routed through extension background (no CSP restrictions)
+
+Example:
+
+```json
+{
+  "cspBypass": ["*.api.example.com", "cdn.example.com"]
+}
+```
+
+Pattern types:
+- Exact: `api.example.com` matches only api.example.com
+- Wildcard: `*.example.com` matches any subdomain (api.example.com, foo.example.com, etc.)
+- Substring: Any hostname containing the pattern
+
+This prevents CSP console errors and allows scripts to make cross-origin requests that would otherwise be blocked.
 
 ## Floating UI
 
