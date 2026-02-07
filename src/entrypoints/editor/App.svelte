@@ -17,6 +17,7 @@ import {
   saveSettings,
   toggleSource,
   toggleSourceScript,
+  updateSourceEnvValues,
   updateSourceToken,
 } from '../../lib/storage'
 import { normalizeDomain } from '../../lib/utils'
@@ -43,7 +44,7 @@ const currentSite = $derived(settings?.sites.find((s) => s.id === currentSiteId)
 const currentScript = $derived(currentSite?.scripts.find((s) => s.id === currentScriptId) ?? null)
 const currentSource = $derived(settings?.sources.find((s) => s.id === currentSourceId) ?? null)
 
-const currentSiteSourceScripts = $derived<SourceScript[]>(() => {
+const currentSiteSourceScripts = $derived.by<SourceScript[]>(() => {
   if (!settings || !currentSite) return []
   const domain = currentSite.domain
   return settings.sources
@@ -300,6 +301,12 @@ async function handleUpdateSourceToken(token: string | null) {
   await updateSourceToken(currentSourceId, token)
   await loadSettings()
 }
+
+async function handleUpdateSourceEnvValues(envValues: Record<string, string>) {
+  if (!currentSourceId) return
+  await updateSourceEnvValues(currentSourceId, envValues)
+  await loadSettings()
+}
 </script>
 
 <div class="flex h-screen bg-[#0f0f1a] text-gray-100 font-sans text-sm overflow-hidden">
@@ -351,6 +358,7 @@ async function handleUpdateSourceToken(token: string | null) {
             onSelectScript={selectSourceScript}
             onToggleScript={handleToggleSourceScript}
             onUpdateToken={handleUpdateSourceToken}
+            onUpdateEnvValues={handleUpdateSourceEnvValues}
           />
         {/if}
       {:else if currentSite}
@@ -387,7 +395,7 @@ async function handleUpdateSourceToken(token: string | null) {
         {:else}
           <SitePanel
             site={currentSite}
-            sourceScripts={currentSiteSourceScripts()}
+            sourceScripts={currentSiteSourceScripts}
             onSelectScript={selectScript}
             onSelectSourceScript={selectSourceScript}
             onAddScript={addScript}

@@ -18,6 +18,11 @@ export interface SourceScript {
   sourceId: string
 }
 
+export interface EnvVar {
+  key: string
+  description?: string
+}
+
 export interface Source {
   id: string
   url: string
@@ -29,6 +34,8 @@ export interface Source {
   lastError: string | null
   version: string
   scripts: SourceScript[]
+  env: EnvVar[]
+  envValues: Record<string, string>
 }
 
 export interface Site {
@@ -119,5 +126,7 @@ export function createSource(url: string, token: string | null = null): Source {
     lastError: null,
     version: '',
     scripts: [],
+    env: [],
+    envValues: {},
   }
 }

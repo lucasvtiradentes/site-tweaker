@@ -232,5 +232,17 @@ export async function updateSourceToken(sourceId: string, token: string | null):
   return source
 }
 
+export async function updateSourceEnvValues(
+  sourceId: string,
+  envValues: Record<string, string>,
+): Promise<Source | null> {
+  const settings = await getSettings()
+  const source = settings.sources.find((s) => s.id === sourceId)
+  if (!source) return null
+  source.envValues = envValues
+  await saveSettings(settings)
+  return source
+}
+
 export { getMatchingSourceScripts, normalizeDomain }
 export type { Script, Settings, Site, Source, SourceScript }

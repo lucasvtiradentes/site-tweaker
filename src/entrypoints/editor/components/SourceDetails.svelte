@@ -13,21 +13,24 @@ interface Props {
   onSelectScript: (script: SourceScript) => void
   onToggleScript: (scriptId: string) => void
   onUpdateToken: (token: string | null) => void
+  onUpdateEnvValues: (envValues: Record<string, string>) => void
 }
 
-const { source, onBack, onRefresh, onSelectScript, onToggleScript, onUpdateToken }: Props = $props()
+const { source, onBack, onRefresh, onSelectScript, onToggleScript, onUpdateToken, onUpdateEnvValues }: Props = $props()
 
 let refreshing = $state(false)
 let editingToken = $state(false)
 let tokenValue = $state('')
 let showToken = $state(false)
+let envValues = $state<Record<string, string>>({ ...source.envValues })
+let showEnvValues = $state<Record<string, boolean>>({})
 
 interface DomainGroup {
   domain: string
   scripts: SourceScript[]
 }
 
-const scriptsByDomain = $derived<DomainGroup[]>(() => {
+const scriptsByDomain = $derived.by<DomainGroup[]>(() => {
   const groups = new Map<string, SourceScript[]>()
   for (const script of source.scripts) {
     const domain = script.domains[0] || 'All domains'
@@ -60,6 +63,11 @@ async function saveToken() {
 function cancelEditToken() {
   editingToken = false
   tokenValue = ''
+}
+
+async function handleEnvChange(key: string, value: string) {
+  envValues[key] = value
+  await onUpdateEnvValues({ ...envValues })
 }
 </script>
 
@@ -114,6 +122,34 @@ function cancelEditToken() {
       </div>
     </section>
 
+    {#if source.env && source.env.length > 0}
+      <section class="mb-6">
+        <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-3">Environment Variables</h3>
+        <div class="space-y-2">
+          {#each source.env as envVar (envVar.key)}
+            <div class="p-3 rounded-lg bg-white/5">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[12px] font-medium text-gray-300 font-mono">{envVar.key}</span>
+                <button onclick={() => showEnvValues[envVar.key] = !showEnvValues[envVar.key]} class="p-1 text-gray-500 hover:text-gray-300">
+                  <Icon name={showEnvValues[envVar.key] ? 'eye-off' : 'eye'} size={14} />
+                </button>
+              </div>
+              {#if envVar.description}
+                <div class="text-[10px] text-gray-600 mb-2">{envVar.description}</div>
+              {/if}
+              <input
+                type={showEnvValues[envVar.key] ? 'text' : 'password'}
+                value={envValues[envVar.key] ?? ''}
+                oninput={(e) => handleEnvChange(envVar.key, e.currentTarget.value)}
+                placeholder="Enter value..."
+                class="w-full px-3 py-1.5 border border-white/10 rounded-md bg-white/5 text-white text-[12px] focus:outline-none focus:border-green-400 font-mono"
+              />
+            </div>
+          {/each}
+        </div>
+      </section>
+    {/if}
+
     <section>
       <h3 class="text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-4">Scripts ({source.scripts.length})</h3>
 
@@ -125,7 +161,7 @@ function cancelEditToken() {
         />
       {:else}
         <div class="space-y-5">
-          {#each scriptsByDomain() as group (group.domain)}
+          {#each scriptsByDomain as group (group.domain)}
             <div>
               <div class="flex items-center gap-2 mb-3">
                 <img src="https://www.google.com/s2/favicons?domain={group.domain}&sz=32" alt="" class="w-4 h-4 rounded-sm" />

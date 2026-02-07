@@ -148,8 +148,16 @@ export default defineBackground(() => {
     }
   }
 
-  async function injectScript(tabId: number, script: Script | SourceScript): Promise<void> {
+  async function injectScript(
+    tabId: number,
+    script: Script | SourceScript,
+    envValues?: Record<string, string>,
+  ): Promise<void> {
     try {
+      const envPrefix =
+        envValues && Object.keys(envValues).length > 0 ? `window.__ST_ENV__=${JSON.stringify(envValues)};` : ''
+      const fullCode = envPrefix + script.code
+
       const results = await chrome.scripting.executeScript({
         target: { tabId },
         func: (code: string, scriptName: string) => {
@@ -174,7 +182,7 @@ export default defineBackground(() => {
             return { success: false, error: String(err) }
           }
         },
-        args: [script.code, script.name],
+        args: [fullCode, script.name],
         world: 'MAIN',
       })
       const result = results[0]?.result as { success: boolean; error?: string } | undefined
@@ -220,7 +228,8 @@ export default defineBackground(() => {
     )
     for (const script of autoRunSourceScripts) {
       console.log(LOG, `injecting auto-run script: "${script.name}"`)
-      await injectScript(tabId, script)
+      const parentSource = settings.sources.find((s) => s.id === script.sourceId)
+      await injectScript(tabId, script, parentSource?.envValues)
     }
   }
 
@@ -261,7 +270,7 @@ export default defineBackground(() => {
     if (!script) return { success: false, error: 'Script not found' }
 
     try {
-      await injectScript(tabId, script)
+      await injectScript(tabId, script, source.envValues)
       return { success: true }
     } catch (err) {
       return { success: false, error: String(err) }

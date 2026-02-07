@@ -22,6 +22,7 @@ interface SourceConfig {
   version: string
   name: string
   description?: string
+  env?: { key: string; description?: string }[]
   scripts: SourceConfigScript[]
 }
 
@@ -167,6 +168,8 @@ export async function refreshSource(source: Source): Promise<Source> {
       lastFetched: Date.now(),
       lastError: null,
       scripts,
+      env: (config.env ?? []).map((e) => ({ key: e.key, description: e.description })),
+      envValues: source.envValues ?? {},
     }
   } catch (err) {
     return {
