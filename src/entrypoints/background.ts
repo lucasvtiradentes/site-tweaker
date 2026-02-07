@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS, type HeaderKey, type Script, type Settings, type SourceScript } from '../lib/configs'
+import { generateCspBypassCode } from '../lib/csp-bypass-client'
 import { MSG } from '../lib/messages'
 import { getMatchingSourceScripts, matchesDomainPattern, matchesPathPattern } from '../lib/sources'
 import { extractDomain } from '../lib/utils'
@@ -156,7 +157,13 @@ export default defineBackground(() => {
     try {
       const envPrefix =
         envValues && Object.keys(envValues).length > 0 ? `window.__ST_ENV__=${JSON.stringify(envValues)};` : ''
-      const fullCode = envPrefix + script.code
+
+      // Generate CSP bypass code with script-specific domains
+      const cspBypassDomains = script.cspBypass || []
+      const cspBypassCode = generateCspBypassCode(cspBypassDomains)
+
+      // Prepend CSP bypass client to all scripts
+      const fullCode = `${cspBypassCode}\n\n${envPrefix}${script.code}`
 
       const results = await chrome.scripting.executeScript({
         target: { tabId },

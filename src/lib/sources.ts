@@ -16,6 +16,7 @@ interface SourceConfigScript {
     domains?: string[]
     paths?: string[]
   }
+  cspBypass?: string[]
 }
 
 interface SourceConfig {
@@ -157,6 +158,7 @@ export async function refreshSource(source: Source): Promise<Source> {
         paths: s.match?.paths ?? [],
         enabled: true,
         sourceId: source.id,
+        cspBypass: s.cspBypass,
       })
     }
 

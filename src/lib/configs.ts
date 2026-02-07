@@ -5,6 +5,7 @@ export interface Script {
   enabled: boolean
   autoRun: boolean
   urlPatterns: string[]
+  cspBypass?: string[]
 }
 
 export interface SourceScript {
@@ -16,6 +17,7 @@ export interface SourceScript {
   paths: string[]
   enabled: boolean
   sourceId: string
+  cspBypass?: string[]
 }
 
 export interface EnvVar {
