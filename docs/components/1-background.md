@@ -46,9 +46,15 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │  ICON STATE:                                                        │
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │  updateIconForTab(tabId, url)                                 │  │
-│  │  ├── active   → has scripts for current domain                │  │
-│  │  ├── outline  → no scripts but extension enabled              │  │
-│  │  └── disabled → extension globally disabled                   │  │
+│  │  ├── active   → has scripts for current domain (filled)       │  │
+│  │  ├── outline  → extension enabled, no scripts (outline)       │  │
+│  │  └── disabled → extension globally disabled (grayscale)       │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  CSP BYPASS PROXY:                                                  │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │  handleCspBypassFetch(url, method, headers, body)             │  │
+│  │  └── Executes fetch from background to bypass page CSP        │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
@@ -107,6 +113,34 @@ JS scripts bypass strict CSP via blob URL technique:
 4. Clean up: URL.revokeObjectURL after load
 ```
 
+### CSP Bypass Proxy
+
+Scripts can optionally specify domains that require CSP bypass for fetch requests:
+
+```
+Page Script (MAIN world)
+  ├── User code calls fetch(url)
+  │
+  ├── generateCspBypassCode() prepended to script
+  │   └── Intercepts fetch for configured domains
+  │
+  ├── Posts ST_FETCH_PROXY_REQUEST to window
+  │
+  └── Receives ST_FETCH_PROXY_RESPONSE with data
+
+Content Script (csp-bypass.content)
+  ├── Listens for ST_FETCH_PROXY_REQUEST
+  │
+  ├── Sends CSP_BYPASS_FETCH to background
+  │
+  └── Posts ST_FETCH_PROXY_RESPONSE back to page
+
+Background Service Worker
+  └── Executes actual fetch (no CSP restrictions)
+```
+
+Environment variables from sources are injected as constants at the top of the script code before CSP bypass code.
+
 
 ## URL Pattern Matching
 
@@ -143,6 +177,7 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 | `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
 | `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
 | `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request (bypass CSP)        | CSP Bypass     |
 
 ## Messages Sent (Outgoing)
 

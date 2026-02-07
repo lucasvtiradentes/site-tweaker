@@ -71,23 +71,23 @@ Derived state via `$derived`:
 
 ## Components
 
-| Component           | Props/Purpose                                      |
-|---------------------|----------------------------------------------------|
-| `Sidebar`           | Navigation tabs, site list, source list            |
-| `SitePanel`         | Site domain display, script list, CSP, delete      |
-| `SettingsPanel`     | Enabled toggle, floating UI, auto-inject, headers  |
-| `ScriptEditor`      | Textarea for code, name, autoRun                   |
-| `ScriptList`        | Renders ScriptItem rows with toggle + actions      |
-| `ScriptItem`        | Single script row: name, toggle                    |
-| `SourcesPanel`      | Source list with refresh all, add, enable/disable  |
-| `SourceDetails`     | Source URL, scripts, token input, refresh          |
-| `AddSiteModal`      | Domain input with normalization                    |
-| `AddSourceModal`    | GitHub URL + optional access token                 |
-| `Toggle`            | Reusable on/off checkbox                           |
-| `Modal`             | Generic modal wrapper with backdrop                |
-| `Icon`              | SVG icon library (13 icons)                        |
-| `SettingRow`        | Labeled row for settings                           |
-| `EmptyState`        | Placeholder for empty lists                        |
+| Component           | Props/Purpose                                            |
+|---------------------|----------------------------------------------------------|
+| `Sidebar`           | Navigation tabs, site list, source list                  |
+| `SitePanel`         | Site domain display, script list, CSP, delete            |
+| `SettingsPanel`     | Enabled toggle, floating UI, auto-inject, headers        |
+| `ScriptEditor`      | Textarea for code, name, autoRun, urlPatterns, cspBypass |
+| `ScriptList`        | Renders ScriptItem rows with toggle + actions            |
+| `ScriptItem`        | Single script row: name, toggle                          |
+| `SourcesPanel`      | Source list with refresh all, add, enable/disable        |
+| `SourceDetails`     | Source URL, scripts, token, env values, refresh          |
+| `AddSiteModal`      | Domain input with normalization                          |
+| `AddSourceModal`    | GitHub URL + optional access token                       |
+| `Toggle`            | Reusable on/off checkbox                                 |
+| `Modal`             | Generic modal wrapper with backdrop                      |
+| `Icon`              | SVG icon library                                         |
+| `SettingRow`        | Labeled row for settings                                 |
+| `EmptyState`        | Placeholder for empty lists                              |
 
 ## Key Handlers
 
@@ -114,5 +114,6 @@ Derived state via `$derived`:
 | `handleToggleSourceScript(scriptId)` | Toggle source script enabled                 |
 | `handleToggleSourceScriptFromSite()` | Toggle source script from site panel         |
 | `handleUpdateSourceToken(token)`     | Update source GitHub token                   |
+| `handleUpdateSourceEnvValues()`      | Update source environment variable values    |
 | `toggleCurrentScriptEnabled()`       | Toggle current script in editor              |
 | `cancelEdit()`                       | Cancel edit and return to site panel         |
