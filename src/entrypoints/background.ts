@@ -396,6 +396,36 @@ export default defineBackground(() => {
   })
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === 'CSP_BYPASS_FETCH') {
+      fetch(msg.url, {
+        method: msg.method || 'GET',
+        headers: msg.headers || {},
+        body: msg.body,
+      })
+        .then(async (response) => {
+          const text = await response.text()
+          let json = null
+          try {
+            json = JSON.parse(text)
+          } catch {}
+
+          sendResponse({
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            text,
+            json,
+          })
+        })
+        .catch((err) => {
+          sendResponse({
+            ok: false,
+            status: 0,
+            error: err instanceof Error ? err.message : String(err),
+          })
+        })
+      return true
+    }
     if (msg.type === MSG.EXECUTE_SCRIPT) {
       const tabId = msg.tabId ?? sender.tab?.id
       if (!tabId) {

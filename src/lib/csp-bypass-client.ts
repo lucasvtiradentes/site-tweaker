@@ -67,18 +67,36 @@ export function generateCspBypassCode(cspBypassDomains: string[] = []): string {
   // CSP bypass domains injected from script configuration
   const CSP_PROXY_DOMAINS = ${JSON.stringify(cspBypassDomains)};
 
+  // Helper to match domain patterns (supports wildcards like *.example.com)
+  function matchesPattern(urlStr, patterns) {
+    if (patterns.length === 0) return false;
+    try {
+      const urlObj = new URL(urlStr);
+      const hostname = urlObj.hostname;
+
+      return patterns.some((pattern) => {
+        // Wildcard subdomain: *.example.com matches api.example.com, foo.example.com, etc
+        if (pattern.startsWith('*.')) {
+          const domain = pattern.slice(2);
+          return hostname === domain || hostname.endsWith('.' + domain);
+        }
+        // Exact match or substring
+        return hostname === pattern || hostname.includes(pattern);
+      });
+    } catch {
+      return false;
+    }
+  }
+
   // Override fetch to use proxy for specific domains (avoids CSP console errors)
   window.fetch = async function(url, options) {
     const urlStr = typeof url === 'string' ? url : url.toString();
 
     // Check if this URL should use proxy
-    const shouldProxy = CSP_PROXY_DOMAINS.some(domain => urlStr.includes(domain));
-
-    if (shouldProxy) {
+    if (matchesPattern(urlStr, CSP_PROXY_DOMAINS)) {
       return await proxyFetch(urlStr, options);
     }
 
-    // For all other requests, use original fetch
     return await originalFetch.call(this, url, options);
   };
 })();
