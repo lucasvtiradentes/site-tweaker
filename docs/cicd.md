@@ -8,7 +8,7 @@ Automated documentation maintenance using Claude Code CLI.
 
 | Setting          | Value                                     |
 |------------------|-------------------------------------------|
-| Trigger          | Daily cron (00:00 UTC) + manual           |
+| Trigger          | Daily cron (03:00 UTC) + manual           |
 | Runner           | ubuntu-latest                             |
 | Timeout          | 15 minutes                                |
 | Node             | 22                                        |
