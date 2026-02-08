@@ -73,13 +73,16 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 
 ## Inter-Component Messages
 
-| Message Type             | Purpose                                  | Sent By        | Handled By |
-|--------------------------|------------------------------------------|----------------|------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI    | Background |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI    | Background |
-| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI    | Background |
-| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup  | Background |
-| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background     | Floating UI|
+| Message Type             | Purpose                                  | Sent By            | Handled By         |
+|--------------------------|------------------------------------------|--------------------|---------------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI        | Background          |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI        | Background          |
+| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI        | Background          |
+| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup      | Background          |
+| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background         | Floating UI         |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request without CSP errors   | CSP Bypass Content | Background          |
+| `ST_FETCH_PROXY_REQUEST` | Request fetch via content script         | Page Script        | CSP Bypass Content  |
+| `ST_FETCH_PROXY_RESPONSE`| Return fetch response to page script     | CSP Bypass Content | Page Script         |
 
 ## Key Configuration
 
@@ -137,7 +140,8 @@ site-tweaker/
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass fetch proxy (injected code)
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
@@ -168,10 +172,12 @@ site-tweaker/
 │       │       ├── SettingRow.svelte    # Labeled setting row
 │       │       ├── EmptyState.svelte    # Empty list placeholder
 │       │       └── index.ts            # Component barrel export
-│       └── floating-ui.content/
-│           ├── index.ts              # Content script entry (shadow DOM)
-│           ├── App.svelte            # Floating panel component
-│           └── style.css             # Isolated panel styles
+│       ├── floating-ui.content/
+│       │   ├── index.ts              # Content script entry (shadow DOM)
+│       │   ├── App.svelte            # Floating panel component
+│       │   └── style.css             # Isolated panel styles
+│       └── csp-bypass.content/
+│           └── index.ts              # CSP bypass fetch proxy (content script)
 │
 ├── docs/
 │   ├── overview.md                   # This file
