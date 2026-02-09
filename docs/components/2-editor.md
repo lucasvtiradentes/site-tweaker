@@ -114,5 +114,6 @@ Derived state via `$derived`:
 | `handleToggleSourceScript(scriptId)` | Toggle source script enabled                 |
 | `handleToggleSourceScriptFromSite()` | Toggle source script from site panel         |
 | `handleUpdateSourceToken(token)`     | Update source GitHub token                   |
+| `handleUpdateSourceEnvValues(vals)`  | Update source environment variable values    |
 | `toggleCurrentScriptEnabled()`       | Toggle current script in editor              |
 | `cancelEdit()`                       | Cancel edit and return to site panel         |

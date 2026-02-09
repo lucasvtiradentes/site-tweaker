@@ -137,6 +137,7 @@ site-tweaker/
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
+│   │   ├── csp-bypass-client.ts      # CSP bypass fetch proxy code generation
 │   │   └── utils.ts                  # Domain extraction, date formatting
 │   │
 │   ├── assets/
@@ -144,6 +145,8 @@ site-tweaker/
 │   │
 │   └── entrypoints/
 │       ├── background.ts             # Service worker (CSP, injection, menus)
+│       ├── csp-bypass.content/
+│       │   └── index.ts              # CSP bypass fetch proxy content script
 │       ├── popup/
 │       │   ├── index.html            # Popup HTML shell
 │       │   └── main.ts               # Opens editor page

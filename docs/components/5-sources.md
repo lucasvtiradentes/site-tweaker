@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["*.api.example.com", "cdn.example.com"]
     }
   ]
 }
@@ -69,7 +76,7 @@ Repos must contain `site-tweaker.config.json` at root:
 | `validateSourceConfig(config)`                     | Validate config schema (version, name, scripts) |
 | `fetchSourceConfig(parsed, token?)`                | Download and validate config.json               |
 | `fetchScriptFile(parsed, file, token?)`            | Download script file (base64 decode)            |
-| `refreshSource(source)`                            | Re-fetch config + all script files              |
+| `refreshSource(source)`                            | Re-fetch config + all script files + env vars   |
 | `getMatchingSourceScripts(sources, domain, path)`  | Filter source scripts by domain + path          |
 | `matchesDomainPattern(domain, pattern)`            | Domain match with wildcard support              |
 | `matchesPathPattern(path, patterns)`               | Path match with glob and regex support          |
@@ -131,3 +138,41 @@ Save to chrome.storage.local
 ## Private Repos
 
 Optional GitHub token stored per source. Token included in API requests as `Authorization: Bearer {token}` header. Token managed via SourceDetails component in editor.
+
+## Environment Variables
+
+Sources can define environment variables that scripts can access at runtime:
+
+```json
+{
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ]
+}
+```
+
+Users provide values in the editor UI. Values are injected as `window.__ST_ENV__` before script execution:
+
+```javascript
+// Script can access env vars
+const apiKey = window.__ST_ENV__?.API_KEY
+```
+
+## CSP Bypass Domains
+
+Scripts can specify domains that should bypass CSP restrictions using the fetch proxy:
+
+```json
+{
+  "scripts": [
+    {
+      "cspBypass": ["*.api.example.com", "cdn.example.com"]
+    }
+  ]
+}
+```
+
+The fetch proxy intercepts `fetch()` calls for matching domains and routes them through the background script (no CSP restrictions). Supports wildcard patterns.
