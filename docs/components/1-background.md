@@ -20,14 +20,16 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  SCRIPT INJECTION:                                                  │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  injectScript(tabId, script)                                  │  │
+│  │  injectScript(tabId, script, envValues?)                      │  │
+│  │  ├── Inject env vars as window.__ST_ENV__                     │  │
+│  │  ├── Prepend CSP bypass proxy code (if cspBypass defined)     │  │
 │  │  └── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
 │  │                                                               │  │
 │  │  injectAutoRunScripts(tabId, url)                             │  │
 │  │  ├── Match domain against sites + sources                     │  │
 │  │  ├── Filter autoRun=true scripts                              │  │
 │  │  ├── Deduplicate via lastInjectedUrl map                      │  │
-│  │  └── Execute matching scripts                                 │  │
+│  │  └── Execute matching scripts with env values                 │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  MANUAL EXECUTION:                                                  │
@@ -137,15 +139,52 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 
 ## Message Handlers (Incoming)
 
-| Message Type             | Action                                  | Sent By        |
-|--------------------------|---------------------------------------- |----------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI    |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
-| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
-| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| Message Type             | Action                                  | Sent By               |
+|--------------------------|---------------------------------------- |-----------------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI           |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI           |
+| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI           |
+| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup         |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request from injected code  | CSP Bypass Content    |
 
 ## Messages Sent (Outgoing)
 
 | Message Type     | Trigger                                       |
 |------------------|-----------------------------------------------|
 | `URL_CHANGED`    | Sent to tabs on `onHistoryStateUpdated` (SPA) |
+
+## CSP Bypass Fetch Proxy
+
+Background acts as proxy for fetch requests from scripts with `cspBypass` domains configured:
+
+```
+Injected script calls fetch()
+           │
+           ▼
+CSP bypass client intercepts (if domain matches cspBypass)
+           │
+           ▼
+Sends CSP_BYPASS_FETCH message to background
+           │
+           ▼
+Background executes fetch() (no CSP restrictions)
+           │
+           ▼
+Returns response to script
+```
+
+This avoids CSP console errors when scripts need to fetch from specific domains.
+
+## Environment Variable Injection
+
+Source scripts can access environment variables configured by users:
+
+```
+Script with env config
+           │
+           ▼
+Background prepends: window.__ST_ENV__ = {"API_KEY": "..."}
+           │
+           ▼
+Script accesses: window.__ST_ENV__.API_KEY
+```

@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "Your API key"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["*.api.example.com"]
     }
   ]
 }
@@ -131,3 +138,26 @@ Save to chrome.storage.local
 ## Private Repos
 
 Optional GitHub token stored per source. Token included in API requests as `Authorization: Bearer {token}` header. Token managed via SourceDetails component in editor.
+
+## Environment Variables
+
+Sources can define required environment variables that users configure per source:
+
+```json
+"env": [
+  { "key": "API_KEY", "description": "Your API key" },
+  { "key": "USER_ID" }
+]
+```
+
+Values are injected as `window.__ST_ENV__` object before script execution.
+
+## CSP Bypass Proxy
+
+Scripts can specify domains that need fetch proxy via `cspBypass` field:
+
+```json
+"cspBypass": ["*.api.example.com", "external-api.com"]
+```
+
+The extension injects a fetch proxy that routes requests through the background service worker, avoiding CSP console errors for specified domains.

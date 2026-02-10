@@ -17,6 +17,7 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 │  Tailwind    │                │  • Script inject   │                │  │Float │  │
 │              │                │  • Context menus   │ content script │  │ UI   │  │
 └──────────────┘                │  • Icon state      │ ──────────────►│  └──────┘  │
+                                │  • Fetch proxy     │                │            │
                                 └──────┬─────────────┘                └────────────┘
                                        │
                                        │ chrome.storage.local
@@ -133,11 +134,12 @@ site-tweaker/
 ├── src/
 │   ├── lib/
 │   │   ├── constants.ts              # APP_NAME, PACKAGE_NAME, CONFIG_FILE
-│   │   ├── configs.ts                # Types: Script, Site, Source, Settings
+│   │   ├── configs.ts                # Types: Script, Site, Source, Settings, EnvVar
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass fetch proxy client code
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
@@ -168,10 +170,12 @@ site-tweaker/
 │       │       ├── SettingRow.svelte    # Labeled setting row
 │       │       ├── EmptyState.svelte    # Empty list placeholder
 │       │       └── index.ts            # Component barrel export
-│       └── floating-ui.content/
-│           ├── index.ts              # Content script entry (shadow DOM)
-│           ├── App.svelte            # Floating panel component
-│           └── style.css             # Isolated panel styles
+│       ├── floating-ui.content/
+│       │   ├── index.ts              # Content script entry (shadow DOM)
+│       │   ├── App.svelte            # Floating panel component
+│       │   └── style.css             # Isolated panel styles
+│       └── csp-bypass.content/
+│           └── index.ts              # CSP bypass proxy content script
 │
 ├── docs/
 │   ├── overview.md                   # This file

@@ -91,28 +91,29 @@ Derived state via `$derived`:
 
 ## Key Handlers
 
-| Handler                              | Action                                       |
-|--------------------------------------|----------------------------------------------|
-| `loadSettings()`                     | Fetch from chrome.storage, update state      |
-| `selectSite(id)`                     | Switch to site view                          |
-| `selectScript(id)`                   | Open script in editor                        |
-| `selectSourceScript(script)`         | View source script (read-only)               |
-| `clearScriptView()`                  | Return from script editor to site panel      |
-| `saveScript(data)`                   | Create new or update existing script         |
-| `deleteScript()`                     | Delete current script (with confirmation)    |
-| `deleteScriptFromList(scriptId)`     | Delete script from list view                 |
-| `toggleScript(scriptId)`             | Toggle script enabled/disabled               |
-| `handleAddSite(domain)`              | Add new site (normalize + dedup)             |
-| `handleSelectDomain(domain)`         | Select or create site by domain              |
-| `deleteSite()`                       | Delete current site (with confirmation)      |
-| `toggleSiteCsp()`                    | Toggle CSP bypass for current site           |
-| `handleAddSource(url, token)`        | Add GitHub source with optional token        |
-| `deleteSource(sourceId)`             | Delete source (with confirmation)            |
-| `handleRefreshSource()`              | Refresh current source from GitHub           |
-| `handleRefreshAllSources()`          | Sync all sources with GitHub                 |
-| `handleToggleSource(sourceId)`       | Toggle source enabled/disabled               |
-| `handleToggleSourceScript(scriptId)` | Toggle source script enabled                 |
-| `handleToggleSourceScriptFromSite()` | Toggle source script from site panel         |
-| `handleUpdateSourceToken(token)`     | Update source GitHub token                   |
-| `toggleCurrentScriptEnabled()`       | Toggle current script in editor              |
-| `cancelEdit()`                       | Cancel edit and return to site panel         |
+| Handler                                   | Action                                       |
+|-------------------------------------------|----------------------------------------------|
+| `loadSettings()`                          | Fetch from chrome.storage, update state      |
+| `selectSite(id)`                          | Switch to site view                          |
+| `selectScript(id)`                        | Open script in editor                        |
+| `selectSourceScript(script)`              | View source script (read-only)               |
+| `clearScriptView()`                       | Return from script editor to site panel      |
+| `saveScript(data)`                        | Create new or update existing script         |
+| `deleteScript()`                          | Delete current script (with confirmation)    |
+| `deleteScriptFromList(scriptId)`          | Delete script from list view                 |
+| `toggleScript(scriptId)`                  | Toggle script enabled/disabled               |
+| `handleAddSite(domain)`                   | Add new site (normalize + dedup)             |
+| `handleSelectDomain(domain)`              | Select or create site by domain              |
+| `deleteSite()`                            | Delete current site (with confirmation)      |
+| `toggleSiteCsp()`                         | Toggle CSP bypass for current site           |
+| `handleAddSource(url, token)`             | Add GitHub source with optional token        |
+| `deleteSource(sourceId)`                  | Delete source (with confirmation)            |
+| `handleRefreshSource()`                   | Refresh current source from GitHub           |
+| `handleRefreshAllSources()`               | Sync all sources with GitHub                 |
+| `handleToggleSource(sourceId)`            | Toggle source enabled/disabled               |
+| `handleToggleSourceScript(scriptId)`      | Toggle source script enabled                 |
+| `handleToggleSourceScriptFromSite()`      | Toggle source script from site panel         |
+| `handleUpdateSourceToken(token)`          | Update source GitHub token                   |
+| `handleUpdateSourceEnvValues(envVals)`    | Update source environment variables          |
+| `toggleCurrentScriptEnabled()`            | Toggle current script in editor              |
+| `cancelEdit()`                            | Cancel edit and return to site panel         |
