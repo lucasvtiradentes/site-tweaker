@@ -22,9 +22,10 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 |--------------|----------------------------------------------------------------------------------|
 | Settings     | enabled, floatingUiEnabled, autoInjectEnabled, sites, sources, headers           |
 | Site         | id, domain, enabled, cspEnabled, scripts                                         |
-| Script       | id, name, code, type (js/css), enabled, autoRun, runAt, urlPatterns              |
-| Source       | id, url, token, name, description, enabled, lastFetched, lastError, version      |
-| SourceScript | id, name, code, type, autoRun, runAt, domains[], paths[], enabled, sourceId      |
+| Script       | id, name, code, enabled, autoRun, urlPatterns, cspBypass?                        |
+| Source       | id, url, token, name, description, enabled, lastFetched, lastError, version, env, envValues |
+| SourceScript | id, name, code, autoRun, domains[], paths[], enabled, sourceId, cspBypass?       |
+| EnvVar       | key, description?                                                                |
 
 ## Manifest Permissions
 
@@ -53,7 +54,8 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 # RULES
 
 - JS injection uses blob URL technique to bypass CSP
-- CSS uses direct chrome.scripting.insertCSS (no CSP issues)
+- CSP bypass fetch proxy intercepts window.fetch for configured domains
+- Scripts can access environment variables via window.__ST_ENV__
 - Shadow DOM isolates Floating UI styles from host page
 - GitHub sources require `site-tweaker.config.json` at repo root
 - Domain matching supports exact and wildcard (`*.example.com`)

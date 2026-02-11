@@ -20,14 +20,16 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  SCRIPT INJECTION:                                                  │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  injectScript(tabId, script)                                  │  │
+│  │  injectScript(tabId, script, envValues?)                      │  │
+│  │  ├── Prepend CSP bypass client code (fetch proxy)             │  │
+│  │  ├── Inject envValues as window.__ST_ENV__                    │  │
 │  │  └── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
 │  │                                                               │  │
 │  │  injectAutoRunScripts(tabId, url)                             │  │
 │  │  ├── Match domain against sites + sources                     │  │
 │  │  ├── Filter autoRun=true scripts                              │  │
 │  │  ├── Deduplicate via lastInjectedUrl map                      │  │
-│  │  └── Execute matching scripts                                 │  │
+│  │  └── Execute matching scripts with envValues                  │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  MANUAL EXECUTION:                                                  │
@@ -63,7 +65,7 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 | `chrome.webNavigation.onHistoryStateUpdated`   | SPA navigation detection + URL_CHANGED msg |
 | `chrome.tabs.onActivated`                      | Update icon + context menu on tab switch   |
 | `chrome.tabs.onRemoved`                        | Clean up lastInjectedUrl map               |
-| `chrome.runtime.onMessage`                     | Handle messages from content scripts       |
+| `chrome.runtime.onMessage`                     | Handle messages + CSP bypass fetch proxy   |
 | `chrome.contextMenus.onClicked`                | Execute script from context menu           |
 | `chrome.storage.onChanged`                     | Refresh CSP rules on settings change       |
 
@@ -99,12 +101,29 @@ Only active for domains with `cspEnabled: true` in site config or source script 
 JS scripts bypass strict CSP via blob URL technique:
 
 ```
-1. Wrap script code in Blob object
-2. Create blob URL: URL.createObjectURL(blob)
-3. Inject via chrome.scripting.executeScript:
+1. Generate CSP bypass client code (fetch proxy)
+2. Prepend envValues as window.__ST_ENV__ (if any)
+3. Prepend CSP bypass code to script code
+4. Wrap full code in Blob object
+5. Create blob URL: URL.createObjectURL(blob)
+6. Inject via chrome.scripting.executeScript:
    • func: creates <script src="blob:..."> element
    • world: MAIN (page context, not isolated)
-4. Clean up: URL.revokeObjectURL after load
+7. Clean up: URL.revokeObjectURL after load
+```
+
+## CSP Bypass Fetch Proxy
+
+Scripts can use a fetch proxy to bypass CSP for specific domains via `script.cspBypass` array:
+
+```
+1. CSP bypass client code is prepended to every script
+2. Client intercepts window.fetch for configured domains
+3. Proxied requests sent via postMessage to content script
+4. Content script forwards to background via CSP_BYPASS_FETCH
+5. Background executes fetch (no CSP restrictions)
+6. Response sent back through postMessage chain
+7. Script receives response as if from native fetch
 ```
 
 
@@ -143,6 +162,7 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 | `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
 | `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
 | `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request to bypass CSP       | Page script    |
 
 ## Messages Sent (Outgoing)
 

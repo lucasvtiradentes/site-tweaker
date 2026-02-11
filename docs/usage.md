@@ -127,6 +127,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +141,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["*.api.example.com"]
     }
   ]
 }

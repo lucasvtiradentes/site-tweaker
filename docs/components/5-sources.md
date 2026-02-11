@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["*.api.example.com"]
     }
   ]
 }
@@ -122,10 +129,25 @@ Download each script file referenced in config
 Update source.scripts[] with new code
         │
         ▼
+Extract env variable definitions from config
+        │
+        ▼
 Set source.lastFetched timestamp
         │
         ▼
 Save to chrome.storage.local
+```
+
+## Environment Variables
+
+Sources can define environment variables that users configure per source:
+
+```
+1. Source config defines env array with key + description
+2. User provides values in SourceDetails panel
+3. Values stored in source.envValues
+4. Injected into scripts as window.__ST_ENV__
+5. Scripts access via window.__ST_ENV__.API_KEY
 ```
 
 ## Private Repos
