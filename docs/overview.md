@@ -80,6 +80,7 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 | `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI    | Background |
 | `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup  | Background |
 | `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background     | Floating UI|
+| `CSP_BYPASS_FETCH`       | Proxy fetch request to bypass CSP        | Page script    | Background |
 
 ## Key Configuration
 
@@ -137,7 +138,8 @@ site-tweaker/
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass proxy client code generator
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
