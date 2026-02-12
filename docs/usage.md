@@ -127,6 +127,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +141,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["api.example.com", "*.cdn.example.com"]
     }
   ]
 }
@@ -159,6 +166,22 @@ The repository must have a `site-tweaker.config.json` at the root:
 ### Refreshing Sources
 
 Click the refresh button on a source to re-fetch the config and all scripts from GitHub. Sources can also be refreshed individually or all at once from the editor.
+
+### Source Environment Variables
+
+Sources can define environment variables that scripts can access:
+
+1. Source config defines `env` array with keys and descriptions
+2. In the editor, set values for each environment variable
+3. Scripts access values via `window.__ST_ENV__` object
+
+### CSP Bypass for Fetch Requests
+
+Scripts can specify domains for CSP-bypassed fetch requests:
+
+- Add `cspBypass` array to script config with domain patterns
+- Fetch requests to these domains use a proxy to avoid CSP errors
+- Supports wildcards: `*.example.com` matches all subdomains
 
 ## Floating UI
 

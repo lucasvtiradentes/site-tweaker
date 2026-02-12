@@ -133,17 +133,20 @@ site-tweaker/
 ├── src/
 │   ├── lib/
 │   │   ├── constants.ts              # APP_NAME, PACKAGE_NAME, CONFIG_FILE
-│   │   ├── configs.ts                # Types: Script, Site, Source, Settings
+│   │   ├── configs.ts                # Types: Script, Site, Source, Settings, EnvVar
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass fetch proxy client code
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
 │   │
 │   └── entrypoints/
 │       ├── background.ts             # Service worker (CSP, injection, menus)
+│       ├── csp-bypass.content/
+│       │   └── index.ts              # CSP bypass fetch proxy relay
 │       ├── popup/
 │       │   ├── index.html            # Popup HTML shell
 │       │   └── main.ts               # Opens editor page

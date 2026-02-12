@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for service"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["api.example.com", "*.cdn.example.com"]
     }
   ]
 }
@@ -131,3 +138,29 @@ Save to chrome.storage.local
 ## Private Repos
 
 Optional GitHub token stored per source. Token included in API requests as `Authorization: Bearer {token}` header. Token managed via SourceDetails component in editor.
+
+## Environment Variables
+
+Sources can define environment variables that scripts access at runtime:
+
+```
+1. Config defines env: [{ key, description }]
+2. User sets envValues in editor UI per source
+3. Background injects window.__ST_ENV__ = {key: value} before script
+4. Script accesses values via window.__ST_ENV__.API_KEY
+```
+
+## CSP Bypass Domains
+
+Scripts can specify domains for CSP-bypassed fetch:
+
+```
+1. Config sets cspBypass: ["api.example.com", "*.cdn.com"]
+2. CSP bypass client code prepended to script
+3. window.fetch intercepted for matching domains
+4. Requests proxied through content script → background
+5. Background performs fetch without CSP restrictions
+6. Response returned to script
+```
+
+This prevents CSP console errors for cross-origin API calls.
