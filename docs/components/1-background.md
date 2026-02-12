@@ -99,13 +99,31 @@ Only active for domains with `cspEnabled: true` in site config or source script 
 JS scripts bypass strict CSP via blob URL technique:
 
 ```
-1. Wrap script code in Blob object
-2. Create blob URL: URL.createObjectURL(blob)
-3. Inject via chrome.scripting.executeScript:
+1. Prepend CSP bypass client code (if script has cspBypass domains)
+2. Prepend environment variables (window.__ST_ENV__)
+3. Wrap full code in Blob object
+4. Create blob URL: URL.createObjectURL(blob)
+5. Inject via chrome.scripting.executeScript:
    • func: creates <script src="blob:..."> element
    • world: MAIN (page context, not isolated)
-4. Clean up: URL.revokeObjectURL after load
+6. Clean up: URL.revokeObjectURL after load
 ```
+
+## CSP Bypass Fetch Proxy
+
+Scripts with `cspBypass` domains get injected with a fetch proxy client:
+
+```
+1. CSP bypass client intercepts window.fetch
+2. If URL matches cspBypass pattern, route through proxy
+3. Proxy sends message to csp-bypass.content script
+4. Content script relays to background via chrome.runtime.sendMessage
+5. Background performs fetch (no CSP restrictions)
+6. Response sent back through message chain
+7. Original fetch() call resolves with response
+```
+
+This avoids CSP console errors for cross-origin requests.
 
 
 ## URL Pattern Matching
@@ -143,6 +161,7 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 | `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
 | `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
 | `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request (bypass CSP)        | CSP content    |
 
 ## Messages Sent (Outgoing)
 
