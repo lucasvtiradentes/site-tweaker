@@ -20,14 +20,16 @@ Central hub for extension logic. Handles CSP removal, script injection, context 
 │                                                                     │
 │  SCRIPT INJECTION:                                                  │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  injectScript(tabId, script)                                  │  │
+│  │  injectScript(tabId, script, envValues?)                      │  │
+│  │  ├── Generate CSP bypass code from script.cspBypass domains   │  │
+│  │  ├── Prepend environment variables (window.__ST_ENV__)        │  │
 │  │  └── JS: blob URL → chrome.scripting.executeScript (MAIN)     │  │
 │  │                                                               │  │
 │  │  injectAutoRunScripts(tabId, url)                             │  │
 │  │  ├── Match domain against sites + sources                     │  │
 │  │  ├── Filter autoRun=true scripts                              │  │
 │  │  ├── Deduplicate via lastInjectedUrl map                      │  │
-│  │  └── Execute matching scripts                                 │  │
+│  │  └── Execute matching scripts with source envValues           │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  MANUAL EXECUTION:                                                  │
@@ -99,13 +101,17 @@ Only active for domains with `cspEnabled: true` in site config or source script 
 JS scripts bypass strict CSP via blob URL technique:
 
 ```
-1. Wrap script code in Blob object
-2. Create blob URL: URL.createObjectURL(blob)
-3. Inject via chrome.scripting.executeScript:
+1. Generate CSP bypass proxy code (if script.cspBypass defined)
+2. Prepend environment variables (if envValues provided)
+3. Wrap combined code in Blob object
+4. Create blob URL: URL.createObjectURL(blob)
+5. Inject via chrome.scripting.executeScript:
    • func: creates <script src="blob:..."> element
    • world: MAIN (page context, not isolated)
-4. Clean up: URL.revokeObjectURL after load
+6. Clean up: URL.revokeObjectURL after load
 ```
+
+CSP bypass proxy code intercepts fetch() calls for configured domains, routing them through the background service worker to avoid CSP violations.
 
 
 ## URL Pattern Matching
@@ -137,12 +143,13 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 
 ## Message Handlers (Incoming)
 
-| Message Type             | Action                                  | Sent By        |
-|--------------------------|---------------------------------------- |----------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI    |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
-| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
-| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| Message Type             | Action                                  | Sent By           |
+|--------------------------|-----------------------------------------|-------------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI       |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI       |
+| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI       |
+| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup     |
+| `CSP_BYPASS_FETCH`       | Proxy fetch request (CSP bypass)        | CSP bypass script |
 
 ## Messages Sent (Outgoing)
 
