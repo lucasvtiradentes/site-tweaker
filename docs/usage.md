@@ -90,7 +90,7 @@ Scripts run in two modes:
 | Auto Run    | Page load (background)    | autoRun: true       |
 | Manual      | Click in Floating UI      | autoRun: false      |
 
-JS injection uses blob URLs to bypass Content Security Policy.
+JS injection uses blob URLs to bypass Content Security Policy. Additionally, scripts can use the CSP bypass fetch proxy to make cross-origin requests without triggering CSP violations.
 
 ### CSP Bypass
 
@@ -127,6 +127,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +141,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["api.example.com", "*.cdn.com"]
     }
   ]
 }

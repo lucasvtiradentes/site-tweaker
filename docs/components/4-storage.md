@@ -27,8 +27,10 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │  }                                        enabled: boolean               │
 │                                           lastFetched: number | null     │
 │                                           lastError: string | null       │
-│                                           version: string                │
-│                                           scripts: SourceScript[]        │
+│  EnvVar {                                 version: string                │
+│    key: string                            scripts: SourceScript[]        │
+│    description?: string                   env: EnvVar[]                  │
+│  }                                        envValues: Record<str, str>    │
 │                                         }                                │
 │                                                                          │
 │  Script {                               SourceScript {                   │
@@ -38,8 +40,9 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │    enabled: boolean                       autoRun: boolean               │
 │    autoRun: boolean                       domains: string[]              │
 │    urlPatterns: string[]                  paths: string[]                │
-│  }                                        enabled: boolean               │
-│                                           sourceId: string               │
+│    cspBypass?: string[]                   enabled: boolean               │
+│  }                                        sourceId: string               │
+│                                           cspBypass?: string[]           │
 │  Headers {                              }                                │
 │    'content-security-policy': boolean                                    │
 │    'content-security-policy-report-only': boolean                        │
@@ -90,16 +93,17 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 
 ### Sources
 
-| Function               | Signature                                                        | Purpose               |
-|------------------------|------------------------------------------------------------------|-----------------------|
-| `addSource()`          | `(url: string, token: string or null) -> Promise<Source>`        | Add GitHub source     |
-| `removeSource()`       | `(sourceId: string) -> Promise<void>`                            | Delete source         |
-| `toggleSource()`       | `(sourceId: string) -> Promise<boolean>`                         | Toggle source enabled |
-| `refreshSource()`      | `(sourceId: string) -> Promise<Source or null>`                  | Sync with GitHub      |
-| `refreshAllSources()`  | `() -> Promise<void>`                                            | Sync all sources      |
-| `toggleSourceScript()` | `(sourceId, scriptId: string) -> Promise<boolean>`               | Toggle source script  |
-| `getSourceById()`      | `(sourceId: string) -> Promise<Source or undefined>`             | Find source by ID     |
-| `updateSourceToken()`  | `(sourceId, token: string or null) -> Promise<Source or null>`   | Update GitHub token   |
+| Function                   | Signature                                                        | Purpose                      |
+|----------------------------|------------------------------------------------------------------|------------------------------|
+| `addSource()`              | `(url: string, token: string or null) -> Promise<Source>`        | Add GitHub source            |
+| `removeSource()`           | `(sourceId: string) -> Promise<void>`                            | Delete source                |
+| `toggleSource()`           | `(sourceId: string) -> Promise<boolean>`                         | Toggle source enabled        |
+| `refreshSource()`          | `(sourceId: string) -> Promise<Source or null>`                  | Sync with GitHub             |
+| `refreshAllSources()`      | `() -> Promise<void>`                                            | Sync all sources             |
+| `toggleSourceScript()`     | `(sourceId, scriptId: string) -> Promise<boolean>`               | Toggle source script         |
+| `getSourceById()`          | `(sourceId: string) -> Promise<Source or undefined>`             | Find source by ID            |
+| `updateSourceToken()`      | `(sourceId, token: string or null) -> Promise<Source or null>`   | Update GitHub token          |
+| `updateSourceEnvValues()`  | `(sourceId, envValues: Record) -> Promise<Source or null>`       | Update environment variables |
 
 ### Queries
 

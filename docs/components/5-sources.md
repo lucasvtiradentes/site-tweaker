@@ -47,6 +47,12 @@ Repos must contain `site-tweaker.config.json` at root:
   "version": "1.0",
   "name": "Collection Name",
   "description": "Optional description",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Display Name",
@@ -55,7 +61,8 @@ Repos must contain `site-tweaker.config.json` at root:
       "match": {
         "domains": ["example.com", "*.example.com"],
         "paths": ["/app/*", "*?tab=settings"]
-      }
+      },
+      "cspBypass": ["api.example.com", "*.cdn.com"]
     }
   ]
 }
@@ -63,17 +70,17 @@ Repos must contain `site-tweaker.config.json` at root:
 
 ## Key Functions
 
-| Function                                           | Purpose                                         |
-|----------------------------------------------------|-------------------------------------------------|
-| `parseGitHubUrl(url)`                              | Extract owner, repo, branch, path from URL      |
-| `validateSourceConfig(config)`                     | Validate config schema (version, name, scripts) |
-| `fetchSourceConfig(parsed, token?)`                | Download and validate config.json               |
-| `fetchScriptFile(parsed, file, token?)`            | Download script file (base64 decode)            |
-| `refreshSource(source)`                            | Re-fetch config + all script files              |
-| `getMatchingSourceScripts(sources, domain, path)`  | Filter source scripts by domain + path          |
-| `matchesDomainPattern(domain, pattern)`            | Domain match with wildcard support              |
-| `matchesPathPattern(path, patterns)`               | Path match with glob and regex support          |
-| `getDisplayUrl(url)`                               | Short display format (owner/repo)               |
+| Function                                           | Purpose                                           |
+|----------------------------------------------------|---------------------------------------------------|
+| `parseGitHubUrl(url)`                              | Extract owner, repo, branch, path from URL        |
+| `validateSourceConfig(config)`                     | Validate config schema (version, name, scripts)   |
+| `fetchSourceConfig(parsed, token?)`                | Download and validate config.json                 |
+| `fetchScriptFile(parsed, file, token?)`            | Download script file (base64 decode)              |
+| `refreshSource(source)`                            | Re-fetch config + all script files + env vars     |
+| `getMatchingSourceScripts(sources, domain, path)`  | Filter source scripts by domain + path            |
+| `matchesDomainPattern(domain, pattern)`            | Domain match with wildcard support                |
+| `matchesPathPattern(path, patterns)`               | Path match with glob and regex support            |
+| `getDisplayUrl(url)`                               | Short display format (owner/repo)                 |
 
 ## GitHub API
 
