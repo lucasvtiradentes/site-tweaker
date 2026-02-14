@@ -1,6 +1,6 @@
 # Overview
 
-Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any website with domain-specific management, CSP bypass, and GitHub source integration.
+Browser extension (Chrome/Edge) that lets users inject custom JavaScript and CSS on any website with domain-specific management, CSP bypass, and GitHub source integration.
 
 ## Architecture
 
@@ -137,19 +137,20 @@ site-tweaker/
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass proxy code generation
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
 │   │
 │   └── entrypoints/
 │       ├── background.ts             # Service worker (CSP, injection, menus)
+│       ├── csp-bypass.content/
+│       │   └── index.ts              # CSP bypass proxy content script
 │       ├── popup/
-│       │   ├── index.html            # Popup HTML shell
 │       │   └── main.ts               # Opens editor page
 │       ├── editor/
 │       │   ├── main.ts               # Svelte mount point
-│       │   ├── index.html            # Editor HTML shell
 │       │   ├── App.svelte            # Main editor component (state + routing)
 │       │   └── components/
 │       │       ├── Sidebar.svelte    # Navigation: Settings, Sites, Sources
@@ -164,7 +165,7 @@ site-tweaker/
 │       │       ├── AddSourceModal.svelte # Add GitHub source dialog
 │       │       ├── Toggle.svelte        # Reusable toggle
 │       │       ├── Modal.svelte         # Generic modal wrapper
-│       │       ├── Icon.svelte          # SVG icon library (13 icons)
+│       │       ├── Icon.svelte          # SVG icon library
 │       │       ├── SettingRow.svelte    # Labeled setting row
 │       │       ├── EmptyState.svelte    # Empty list placeholder
 │       │       └── index.ts            # Component barrel export
