@@ -76,10 +76,11 @@ Open the editor page (click extension icon or right-click → Options):
 | Field        | Options                                | Default        |
 |--------------|----------------------------------------|----------------|
 | Name         | Free text                              | "New Script"   |
-| Code         | JavaScript code                        | empty          |
+| Code         | JavaScript or CSS code                 | empty          |
 | Enabled      | Toggle on/off                          | true           |
 | Auto Run     | Inject on page load                    | false          |
 | URL Patterns | Glob/regex patterns to limit injection | [] (all pages) |
+| CSP Bypass   | Domain patterns for fetch proxy        | [] (none)      |
 
 ### Script Execution
 
@@ -127,6 +128,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "Optional API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +142,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["*.api.github.com"]
     }
   ]
 }

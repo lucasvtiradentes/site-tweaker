@@ -99,13 +99,29 @@ Only active for domains with `cspEnabled: true` in site config or source script 
 JS scripts bypass strict CSP via blob URL technique:
 
 ```
-1. Wrap script code in Blob object
-2. Create blob URL: URL.createObjectURL(blob)
-3. Inject via chrome.scripting.executeScript:
+1. Prepend CSP bypass proxy code to script
+2. Wrap combined code in Blob object
+3. Create blob URL: URL.createObjectURL(blob)
+4. Inject via chrome.scripting.executeScript:
    • func: creates <script src="blob:..."> element
    • world: MAIN (page context, not isolated)
-4. Clean up: URL.revokeObjectURL after load
+5. Clean up: URL.revokeObjectURL after load
 ```
+
+## CSP Bypass Fetch Proxy
+
+Scripts can specify `cspBypass` domains to proxy fetch requests:
+
+```
+1. CSP bypass client code injected with script
+2. Client intercepts fetch() for matching domains
+3. Sends message to csp-bypass.content script
+4. Content script forwards to background worker
+5. Background executes fetch with full permissions
+6. Response sent back to page script
+```
+
+This allows scripts to make API calls to domains blocked by CSP without console errors.
 
 
 ## URL Pattern Matching
@@ -137,12 +153,13 @@ Tracks `lastInjectedUrl` per tab to prevent duplicate injection:
 
 ## Message Handlers (Incoming)
 
-| Message Type             | Action                                  | Sent By        |
-|--------------------------|---------------------------------------- |----------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI    |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI    |
-| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI    |
-| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup  |
+| Message Type             | Action                                  | Sent By              |
+|--------------------------|---------------------------------------- |----------------------|
+| `CSP_BYPASS_FETCH`       | Proxy fetch request to bypass CSP       | CSP bypass content   |
+| `EXECUTE_SCRIPT`         | Run site script manually                | Floating UI          |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually              | Floating UI          |
+| `GET_SITE_DATA`          | Return site + source scripts for domain | Floating UI          |
+| `GET_CURRENT_TAB_INFO`   | Return active tab URL and domain        | Editor, Popup        |
 
 ## Messages Sent (Outgoing)
 
