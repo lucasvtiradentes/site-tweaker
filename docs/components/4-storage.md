@@ -29,6 +29,8 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │                                           lastError: string | null       │
 │                                           version: string                │
 │                                           scripts: SourceScript[]        │
+│                                           env: EnvVar[]                  │
+│                                           envValues: Record<string, str> │
 │                                         }                                │
 │                                                                          │
 │  Script {                               SourceScript {                   │
@@ -38,9 +40,15 @@ Chrome storage layer with typed CRUD operations. All data persisted in `chrome.s
 │    enabled: boolean                       autoRun: boolean               │
 │    autoRun: boolean                       domains: string[]              │
 │    urlPatterns: string[]                  paths: string[]                │
-│  }                                        enabled: boolean               │
-│                                           sourceId: string               │
-│  Headers {                              }                                │
+│    cspBypass?: string[]                   enabled: boolean               │
+│  }                                        sourceId: string               │
+│                                           cspBypass?: string[]           │
+│  EnvVar {                               }                                │
+│    key: string                                                           │
+│    description?: string                                                  │
+│  }                                                                       │
+│                                                                          │
+│  Headers {                                                               │
 │    'content-security-policy': boolean                                    │
 │    'content-security-policy-report-only': boolean                        │
 │    'x-webkit-csp': boolean                                               │

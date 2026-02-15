@@ -80,6 +80,7 @@ Open the editor page (click extension icon or right-click → Options):
 | Enabled      | Toggle on/off                          | true           |
 | Auto Run     | Inject on page load                    | false          |
 | URL Patterns | Glob/regex patterns to limit injection | [] (all pages) |
+| CSP Bypass   | Domain patterns for fetch proxy        | [] (disabled)  |
 
 ### Script Execution
 
@@ -90,7 +91,7 @@ Scripts run in two modes:
 | Auto Run    | Page load (background)    | autoRun: true       |
 | Manual      | Click in Floating UI      | autoRun: false      |
 
-JS injection uses blob URLs to bypass Content Security Policy.
+JS injection uses blob URLs to bypass Content Security Policy. Scripts can also specify CSP bypass domains to proxy fetch() requests and avoid CSP console errors.
 
 ### CSP Bypass
 
@@ -106,6 +107,15 @@ When CSP is enabled for a site, the extension removes these headers via declarat
 - reporting-endpoints
 
 Each header type can be individually toggled in Settings.
+
+### CSP Bypass Fetch Proxy
+
+Scripts can specify domain patterns in the `cspBypass` field to proxy fetch() requests through the extension background, avoiding CSP console errors:
+
+- Add domain patterns like `api.example.com` or `*.example.com`
+- Fetch requests to these domains use a message-based proxy
+- No CSP errors logged in console
+- Supports wildcard subdomains
 
 ## GitHub Sources
 
@@ -127,6 +137,12 @@ The repository must have a `site-tweaker.config.json` at the root:
   "version": "1.0.0",
   "name": "My Scripts",
   "description": "Custom scripts collection",
+  "env": [
+    {
+      "key": "API_KEY",
+      "description": "API key for external service"
+    }
+  ],
   "scripts": [
     {
       "name": "Dark Mode",
@@ -135,7 +151,8 @@ The repository must have a `site-tweaker.config.json` at the root:
       "match": {
         "domains": ["github.com", "*.gitlab.com"],
         "paths": ["/settings/*", "^/users/\\d+"]
-      }
+      },
+      "cspBypass": ["api.github.com", "*.example.com"]
     }
   ]
 }
@@ -155,6 +172,14 @@ The repository must have a `site-tweaker.config.json` at the root:
 | `/app/*`           | Glob   | /app/anything                        |
 | `*?tab=settings`   | Glob   | Any URL with tab=settings param      |
 | `^/users/\d+`      | Regex  | /users/123, /users/456               |
+
+### Environment Variables
+
+Sources can define environment variables that scripts can access:
+
+1. Define `env` array in config with key and optional description
+2. Set values in the source settings in the editor
+3. Access in scripts via `window.__ST_ENV__` object
 
 ### Refreshing Sources
 

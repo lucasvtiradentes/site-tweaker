@@ -14,8 +14,8 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 │   (Options)  │    events      │   Service Worker   │   inject JS    │            │
 │              │                │                    │                │            │
 │  Svelte 5    │                │  • CSP removal     │                │  ┌──────┐  │
-│  Tailwind    │                │  • Script inject   │                │  │Float │  │
-│              │                │  • Context menus   │ content script │  │ UI   │  │
+│  Tailwind    │                │  • Script inject   │   CSP bypass   │  │Float │  │
+│              │                │  • Context menus   │   proxy (fetch)│  │ UI   │  │
 └──────────────┘                │  • Icon state      │ ──────────────►│  └──────┘  │
                                 └──────┬─────────────┘                └────────────┘
                                        │
@@ -56,6 +56,8 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
 3. INJECTION
    chrome.scripting.executeScript
    • JS: blob URL injection (bypasses CSP)
+   • CSP bypass client code prepended to scripts
+   • Environment variables injected (if source script)
    • World: MAIN (page context)
                      │
                      ▼
@@ -69,17 +71,24 @@ Browser extension (Chrome/Edge) that lets users inject custom JavaScript on any 
    declarativeNetRequest removes CSP headers
    • Only for domains with CSP toggle enabled
    • Configurable header types
+
+6. CSP BYPASS PROXY (optional)
+   Content script proxies fetch() for specific domains
+   • Scripts can specify cspBypass domains
+   • Fetch proxy avoids CSP console errors
+   • Background handles actual requests
 ```
 
 ## Inter-Component Messages
 
-| Message Type             | Purpose                                  | Sent By        | Handled By |
-|--------------------------|------------------------------------------|----------------|------------|
-| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI    | Background |
-| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI    | Background |
-| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI    | Background |
-| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup  | Background |
-| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background     | Floating UI|
+| Message Type             | Purpose                                  | Sent By            | Handled By |
+|--------------------------|------------------------------------------|--------------------|------------|
+| `EXECUTE_SCRIPT`         | Run site script manually                 | Floating UI        | Background |
+| `EXECUTE_SOURCE_SCRIPT`  | Run source script manually               | Floating UI        | Background |
+| `GET_SITE_DATA`          | Fetch site + source scripts for domain   | Floating UI        | Background |
+| `GET_CURRENT_TAB_INFO`   | Get active tab URL and domain            | Editor, Popup      | Background |
+| `URL_CHANGED`            | Notify SPA navigation (URL changed)      | Background         | Floating UI|
+| `CSP_BYPASS_FETCH`       | Proxy fetch request to bypass CSP        | CSP bypass content | Background |
 
 ## Key Configuration
 
@@ -133,17 +142,20 @@ site-tweaker/
 ├── src/
 │   ├── lib/
 │   │   ├── constants.ts              # APP_NAME, PACKAGE_NAME, CONFIG_FILE
-│   │   ├── configs.ts                # Types: Script, Site, Source, Settings
+│   │   ├── configs.ts                # Types: Script, Site, Source, Settings, EnvVar
 │   │   ├── storage.ts                # Chrome storage CRUD operations
 │   │   ├── sources.ts                # GitHub integration + pattern matching
 │   │   ├── messages.ts               # Inter-component message types
-│   │   └── utils.ts                  # Domain extraction, date formatting
+│   │   ├── utils.ts                  # Domain extraction, date formatting
+│   │   └── csp-bypass-client.ts      # CSP bypass fetch proxy code generation
 │   │
 │   ├── assets/
 │   │   └── app.css                   # Global Tailwind styles
 │   │
 │   └── entrypoints/
-│       ├── background.ts             # Service worker (CSP, injection, menus)
+│       ├── background.ts             # Service worker (CSP, injection, menus, fetch proxy)
+│       ├── csp-bypass.content/
+│       │   └── index.ts              # CSP bypass fetch proxy content script
 │       ├── popup/
 │       │   ├── index.html            # Popup HTML shell
 │       │   └── main.ts               # Opens editor page
