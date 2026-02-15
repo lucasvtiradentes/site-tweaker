@@ -18,13 +18,14 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 
 ## Data Model
 
-| Type         | Key Fields                                                                       |
-|--------------|----------------------------------------------------------------------------------|
-| Settings     | enabled, floatingUiEnabled, autoInjectEnabled, sites, sources, headers           |
-| Site         | id, domain, enabled, cspEnabled, scripts                                         |
-| Script       | id, name, code, type (js/css), enabled, autoRun, runAt, urlPatterns              |
-| Source       | id, url, token, name, description, enabled, lastFetched, lastError, version      |
-| SourceScript | id, name, code, type, autoRun, runAt, domains[], paths[], enabled, sourceId      |
+| Type         | Key Fields                                                                           |
+|--------------|--------------------------------------------------------------------------------------|
+| Settings     | enabled, floatingUiEnabled, autoInjectEnabled, sites, sources, headers               |
+| Site         | id, domain, enabled, cspEnabled, scripts                                             |
+| Script       | id, name, code, enabled, autoRun, urlPatterns, cspBypass                             |
+| Source       | id, url, token, name, description, enabled, lastFetched, lastError, version, env     |
+| SourceScript | id, name, code, autoRun, domains[], paths[], enabled, sourceId, cspBypass            |
+| EnvVar       | key, description                                                                     |
 
 ## Manifest Permissions
 
@@ -53,9 +54,11 @@ Flow: User configures sites/scripts in Editor → Background service worker matc
 # RULES
 
 - JS injection uses blob URL technique to bypass CSP
-- CSS uses direct chrome.scripting.insertCSS (no CSP issues)
+- CSP bypass fetch proxy allows scripts to avoid CSP errors on fetch requests
+- Scripts can specify `cspBypass` domains for fetch proxy (e.g., `["api.example.com"]`)
 - Shadow DOM isolates Floating UI styles from host page
 - GitHub sources require `site-tweaker.config.json` at repo root
+- Sources can define environment variables accessible via `window.__ST_ENV__`
 - Domain matching supports exact and wildcard (`*.example.com`)
 - Path matching supports glob (`/app/*`) and regex (`^/users/\d+`)
 
